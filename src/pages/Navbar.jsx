@@ -91,7 +91,19 @@ export default function Navbar() {
           {!token ? (
             <NavLink to="/login">Login</NavLink>
           ) : (
-            <button onClick={handleLogout}><IoMdLogOut /></button>
+            <span className="flex gap-2">
+                <NavLink to={"/profile"}
+                    className="text-white px-2 py-2 rounded-full bg-gray-600 hover:bg-gray-800"
+                    >
+                    <FaUserCircle />
+                </NavLink>
+                <button
+                    onClick={handleLogout}
+                    className="text-white px-2 py-2 rounded-full bg-red-600 hover:bg-red-800"
+                    >
+                    <IoMdLogOut />
+                </button>
+            </span>
           )}
         </div>
       )}
