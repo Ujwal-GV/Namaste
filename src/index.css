@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Boldonse&family=Geo:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Boldonse&family=Geo:ital@0;1&family=Macondo&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chicle&family=Macondo&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Knewave&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Grechen+Fuemen&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sansita+Swashed:wght@300..900&display=swap');
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.animatespin-slow-reverse{
+  animation:rotateReverseAnimation 1s ease-in-out infinite ;
+} 
+
+@keyframes rotateReverseAnimation {
+  0%{
+    transform:rotate(0deg);
+  }
+  100%{
+    transform:rotate(-360deg);
+  }
+  
+}
+
+.bg-transition {
+  transition: background 0.4s;
+}
+
+.btn-accept{
+  @apply bg-blue-900 bg-gradient-to-b text-white rounded-lg hover:cursor-pointer hover:bg-blue-950 px-2 py-1;
+}
+
+.btn-accept-outline{
+  @apply border-black border rounded-lg hover:cursor-pointer;
+}
+
+.btn-reject{
+  @apply bg-red-900 bg-gradient-to-b text-white rounded-lg hover:cursor-pointer hover:bg-red-950 px-2 py-1;
+}
+
+.btn-reject-outline{
+  @apply border-red-950 border rounded-lg hover:cursor-pointer;
+}
+
+@media (max-width: 800px) {
+  .custom-scroll::-webkit-scrollbar {
+    width: 0px !important; /* Hide scrollbar */
+  }
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: #848c9032 ;
+  border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #c9c8c8;
+  border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9c9c9c !important;
+  cursor: pointer;
+}
+
+.custom-scroll-nowidth::-webkit-scrollbar {
+  width: 0px;
+}
+
+.dashboard-card{
+  background: rgb(25, 24, 55);
+  box-shadow: 0 6px 0px 0 rgba( 31, 38, 135, 0.37 );
+  backdrop-filter: blur( 14px );
+  -webkit-backdrop-filter: blur( 14px );
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.dashboard-card2{
+  background: rgba(21, 19, 83, 0.493);
+  backdrop-filter: blur( 14px );
+  -webkit-backdrop-filter: blur( 10px );
+}
+
+.custom-background-color {
+  color: white !important;
+  background: rgba(128, 124, 131, 0.775);
+  box-shadow: 1px 1px 5px 0 white;
+  backdrop-filter: blur( 14px );
+  -webkit-backdrop-filter: blur( 14px );
+  border-radius: 10px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
+
+/* .geo-regular {
+  font-family: "Geo", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  border-radius: 8px;
+}
+
+.geo-regular-italic {
+  font-family: "Geo", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.macondo-regular {
+  font-family: "Macondo", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.chicle-regular {
+  font-family: "Chicle", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.knewave-regular {
+  font-family: "Knewave", system-ui;
+  font-style: normal;
+}
+
+.grechen-fuemen-regular {
+  font-family: "Grechen Fuemen", cursive;
+  font-weight: bold;
+  font-style: normal;
+}
+
+.sansita-swashed-ujwal {
+  font-family: "Sansita Swashed", system-ui;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+} */
