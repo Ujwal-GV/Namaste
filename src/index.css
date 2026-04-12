@@ -4,11 +4,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Knewave&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Grechen+Fuemen&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Sansita+Swashed:wght@300..900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Sansita+Swashed:wght@300..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1 {
+  @apply text-3xl md:text-4xl font-bold tracking-tight;
+}
+
+h2 {
+  @apply text-2xl md:text-3xl font-semibold tracking-tight;
+}
+
+h3 {
+  @apply text-xl font-semibold;
+}
+
+p {
+  @apply text-sm md:text-base text-gray-600;
+}
+
+button {
+  @apply font-medium;
+}
 
 .animatespin-slow-reverse{
   animation:rotateReverseAnimation 1s ease-in-out infinite ;
