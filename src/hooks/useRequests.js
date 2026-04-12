@@ -45,7 +45,7 @@ export const useUpdateRequest = () => {
 
   return useMutation({
     mutationFn: ({ id, status }) =>
-      API.put(`/user/${id}`, { status }),
+      API.put(`/property/update-status/${id}`, { status }),
 
     onSuccess: (res) => {
       toast.success(res?.data?.message || "Request Approved");
@@ -58,7 +58,7 @@ export const useApplyOwner = () => {
     return useMutation({
     mutationFn: (data) => {
         console.log("Apply Owner", data);
-        return API.post("/user/apply-owner", data);
+        return API.put("/user/update-profile", data);
     },
     onSuccess: (res) => {
       console.log("Response: ", res.data);

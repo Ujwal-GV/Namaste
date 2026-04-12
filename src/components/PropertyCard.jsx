@@ -1,53 +1,61 @@
-import { useApply } from "../hooks/useRequests";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { IoHome } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
 import { FaRupeeSign, FaEye } from "react-icons/fa";
-import { MdDeleteOutline, MdModeEditOutline } from "react-icons/md";
 
 export default function PropertyCard({ property }) {
   const { token, user } = useContext(AuthContext);
-  const { mutate } = useApply();
-
-  const handleApply = () => {
-    mutate({
-      propertyId: property._id,
-      message: "Interested in this property",
-    });
-  };
 
   return (
     <Link to={`/property/${property._id}`}>
-        <div className="bg-white p-4 rounded-xl shadow-gray-600 shadow-md hover:shadow-gray-100 hover:cursor-pointer bg-transition">
-        <h3 className="text-xl font-semibold mb-2 chicle-regular flex items-center gap-1"><IoHome />{property.title}</h3>
-        <p className="geo-regular flex gap-2 items-center"><FaLocationDot className="text-red-600" />{property.location}</p>
-        <p className="grechen-fuemen-regular text-green-600 flex gap-2 items-center"><FaRupeeSign className="text-green-600" />{property.rent}</p>
+      <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-300">
 
-        {user?.role === "owner" ? (
-            <div className="flex justify-end gap-2">
-              {/* <button className="mt-4 bg-modified text-white p-2 rounded hover:bg-gray-700">
-                <MdModeEditOutline />
-              </button>
-              <button className="mt-4 bg-red-600 text-white p-2 rounded hover:bg-red-800">
-                <MdDeleteOutline />
-              </button> */}
-
-              <button className="mt-4 bg-modified text-white p-2 rounded hover:bg-gray-700 flex items-center gap-2 text-xsm">View <FaEye /></button>
+        <div className="w-full h-40 bg-gray-200">
+          {property?.images?.[0] ? (
+            <img
+              src={property.images[0]}
+              alt={property.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              No Image
             </div>
-            ) : (
-            <button
-                className={`mt-4 w-full py-2 rounded ${
-                token
-                    ? "bg-modified text-white"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-            >
-                View
-            </button>
-            )}
+          )}
         </div>
+
+        <div className="p-4 flex flex-col gap-2">
+
+          <h3 className="text-lg md:text-xl font-semibold flex items-center gap-2 truncate">
+            <IoHome />
+            {property.title}
+          </h3>
+
+          <p className="text-sm text-gray-600 flex items-center gap-2">
+            <FaLocationDot className="text-red-500" />
+            {property.location}
+          </p>
+
+          <p className="text-green-600 font-bold flex items-center gap-2 text-base md:text-lg">
+            <FaRupeeSign />
+            {property.rent}
+          </p>
+
+          <button
+            disabled={!token && user?.role !== "owner"}
+            className={`mt-2 w-full py-2 rounded-lg flex items-center justify-center gap-2 text-sm md:text-base transition ${
+              token || user?.role === "owner"
+                ? "bg-black text-white hover:bg-gray-800"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            View <FaEye />
+          </button>
+
+        </div>
+      </div>
     </Link>
   );
 }

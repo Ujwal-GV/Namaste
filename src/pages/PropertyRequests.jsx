@@ -1,86 +1,133 @@
 import { useParams } from "react-router-dom";
+import { useState, useMemo } from "react";
 import SkeletonCard from "../components/SkeletonCard";
-import { getPropertyRequests, useOwnerRequests, useUpdateRequest } from "../hooks/useRequests";
+import { getPropertyRequests, useUpdateRequest } from "../hooks/useRequests";
 import { FaCircleExclamation } from "react-icons/fa6";
 import { IoHomeOutline } from "react-icons/io5";
 
 export default function PropertyRequests() {
-    const { id } = useParams();
+  const { id } = useParams();
   const { data, isLoading } = getPropertyRequests(id);
-  const { mutate } = useUpdateRequest();  
+  const { mutate } = useUpdateRequest();
+
+  const [filter, setFilter] = useState("all");
+
+  const filteredRequests = useMemo(() => {
+    if (!data?.requests) return [];
+    if (filter === "all") return data.requests;
+    return data.requests.filter((r) => r.status === filter);
+  }, [data, filter]);
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "accepted":
+        return "bg-green-100 text-green-600";
+      case "rejected":
+        return "bg-red-100 text-red-500";
+      default:
+        return "bg-yellow-100 text-yellow-600";
+    }
+  };
 
   return (
-    <div className="p-6 max-w-full mx-auto">
-      <h2 className="text-2xl mb-4 flex flex-row gap-2">Applications for <span className="font-bold text-green-700 flex items-center gap-2">{data?.propertyName} <IoHomeOutline className="text-green-700" /></span></h2>
-      <hr className="text-gray-100 mb-3 border-2" />
-      {isLoading ? (
-        <div className="grid md:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-            <SkeletonCard key={i} />
-            ))}
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+
+      <div className="bg-white shadow rounded-2xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+
+        <div className="flex items-center gap-2">
+          <IoHomeOutline className="text-green-600 text-xl" />
+          <h2 className="text-lg md:text-xl">
+            Applications for{" "}
+            <span className="font-bold text-green-700">
+              {data?.propertyName || "Property"}
+            </span>
+          </h2>
         </div>
-        ) : (
-        data?.requests?.length > 0 ? 
-        <>
-            <div className="grid md:grid-cols-3 gap-6">
-                {data?.requests?.map((req) => (
-                    <div
-                    key={req._id}
-                    className="border p-4 rounded-xl mb-3 bg-white shadow-gray-600 shadow-md hover:shadow-gray-100 hover:cursor-pointer bg-transition"
-                    >
-                    <p><b>Name:</b> {req?.userName}</p>
-                    <p><b>Email:</b> {req?.userEmail}</p>
-                    {/* <p><b>Message:</b> {req?.message}</p> */}
 
-                    {/* Status */}
-                    <p className="mt-2">
-                        <b>Status:</b>{" "}
-                        <span
-                        className={`${
-                            req.status === "accepted"
-                            ? "text-green-600"
-                            : req.status === "rejected"
-                            ? "text-red-500"
-                            : "text-yellow-500"
-                        }`}
-                        >
-                        <span className="uppercase font-bold">{req.status}</span>
-                        </span>
-                    </p>
-
-                    {/* Actions */}
-                    {req.status === "pending" && (
-                        <div className="flex gap-3 mt-3">
-                        <button
-                            onClick={() =>
-                                mutate({ id: req._id, status: "accepted" })
-                            }
-                            className="macondo-regular text-md text-blue-950 bg-tahiti hover:bg-bermuda hover:text-black rounded-lg px-2 py-1"
-                        >
-                            Accept
-                        </button>
-
-                        <button
-                            onClick={() =>
-                            mutate({ id: req._id, status: "rejected" })
-                            }
-                            className="geo-regular-italic text-md bg-sunset rounded-lg px-2 py-1"
-                        >
-                            Reject
-                        </button>
-                        </div>
-                    )}
-                    </div>
+        <div className="w-full overflow-x-auto no-scrollbar">
+            <div className="flex gap-2 min-w-max pb-1">
+                {["all", "pending", "accepted", "rejected"].map((item) => (
+                <button
+                    key={item}
+                    onClick={() => setFilter(item)}
+                    className={`px-4 py-1 rounded-full text-sm capitalize whitespace-nowrap transition ${
+                    filter === item
+                        ? "bg-black text-white"
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                    }`}
+                >
+                    {item}
+                </button>
                 ))}
             </div>
-        </> : 
-        <div className="h-[620px] flex items-center justify-center">
+        </div>
+      </div>
 
-            <div className="flex items-center justify-center gap-2">
-            No requests found <FaCircleExclamation className="text-gray-600" />
+      {isLoading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
+      ) : filteredRequests.length > 0 ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {filteredRequests.map((req) => (
+            <div
+              key={req._id}
+              className="bg-white rounded-2xl shadow p-5 flex flex-col justify-between hover:shadow-lg transition"
+            >
+
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500 flex gap-2">Applicant: <h3 className="font-semibold">{req.userName}</h3></p>
+                
+
+                <p className="text-sm text-gray-500">Email: <span className="text-sm truncate">{req.userEmail}</span></p>
+                
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getStatusStyle(
+                    req.status
+                  )}`}
+                >
+                  {req.status}
+                </span>
+
+                {req.status === "pending" && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        mutate({ id: req._id, status: "accepted" })
+                      }
+                      className="px-3 py-1 text-xs rounded-lg bg-green-500 text-white hover:bg-green-600"
+                    >
+                      Accept
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        mutate({ id: req._id, status: "rejected" })
+                      }
+                      className="px-3 py-1 text-xs rounded-lg bg-red-500 text-white hover:bg-red-600"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
         </div>
-        )}
+      ) : (
+        <div className="h-[60vh] flex flex-col items-center justify-center text-gray-500 gap-2">
+          <FaCircleExclamation size={24} />
+          <p>No {filter !== "all" ? filter : ""} requests found</p>
+        </div>
+      )}
     </div>
   );
 }

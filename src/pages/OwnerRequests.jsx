@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import SkeletonCard from "../components/SkeletonCard";
 import { useOwnerRequests, useUpdateRequest } from "../hooks/useRequests";
 import { FaCircleExclamation } from "react-icons/fa6";
@@ -6,77 +7,119 @@ export default function OwnerRequests() {
   const { data, isLoading } = useOwnerRequests();
   const { mutate } = useUpdateRequest();
 
+  const [filter, setFilter] = useState("all");
+
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    if (filter === "all") return data;
+    return data.filter((req) => req.status === filter);
+  }, [data, filter]);
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "accepted":
+        return "bg-green-100 text-green-600";
+      case "rejected":
+        return "bg-red-100 text-red-500";
+      default:
+        return "bg-yellow-100 text-yellow-600";
+    }
+  };
+
   return (
-    <div className="p-6 max-w-full mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Applications</h2>
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+        <h2 className="text-2xl font-bold">Applications</h2>
+
+        <div className="flex gap-2 overflow-x-auto">
+          {["all", "pending", "accepted", "rejected"].map((item) => (
+            <button
+              key={item}
+              onClick={() => setFilter(item)}
+              className={`px-4 py-1 rounded-full text-sm capitalize whitespace-nowrap transition ${
+                filter === item
+                  ? "bg-black text-white"
+                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              }`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {isLoading ? (
-        <div className="grid md:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
             <SkeletonCard key={i} />
-            ))}
+          ))}
         </div>
-        ) : (
-        data.length > 0 ? 
-        <>
-            <div className="grid md:grid-cols-3 gap-6">
-                {data?.map((req) => (
-                    <div
-                    key={req._id}
-                    className="border p-4 rounded-xl mb-3 bg-white shadow-gray-600 shadow-md hover:shadow-gray-100 hover:cursor-pointer bg-transition"
+      ) : filteredData.length > 0 ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {filteredData.map((req) => (
+            <div
+              key={req._id}
+              className="bg-white rounded-2xl shadow p-5 flex flex-col justify-between hover:shadow-lg transition"
+            >
+
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500">Property</p>
+                <h3 className="font-semibold text-lg">
+                  {req.propertyTitle}
+                </h3>
+
+                <p className="text-sm text-gray-500 mt-2">User: <span className="text-sm truncate">{req.userEmail}</span></p>
+
+                <p className="text-sm text-gray-500 mt-2 flex gap-2">Message: <span className="text-sm text-gray-700 line-clamp-2">
+                  {req.message}
+                </span></p>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getStatusStyle(
+                    req.status
+                  )}`}
+                >
+                  {req.status}
+                </span>
+
+                {req.status === "pending" && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        mutate({ id: req._id, status: "accepted" })
+                      }
+                      className="px-3 py-1 text-xs rounded-lg bg-green-500 text-white hover:bg-green-600"
                     >
-                    <p><b>Property:</b> {req?.propertyTitle}</p>
-                    <p><b>User:</b> {req?.userEmail}</p>
-                    <p><b>Message:</b> {req?.message}</p>
+                      Accept
+                    </button>
 
-                    {/* Status */}
-                    <p className="mt-2">
-                        <b>Status:</b>{" "}
-                        <span
-                        className={`${
-                            req.status === "accepted"
-                            ? "text-green-600"
-                            : req.status === "rejected"
-                            ? "text-red-500"
-                            : "text-yellow-500"
-                        }`}
-                        >
-                        <span className="uppercase font-bold">{req.status}</span>
-                        </span>
-                    </p>
-
-                    {/* Actions */}
-                    {req.status === "pending" && (
-                        <div className="flex gap-3 mt-3">
-                        <button
-                            onClick={() =>
-                            mutate({ id: req._id, status: "accepted" })
-                            }
-                            className="macondo-regular text-md text-blue-950 bg-tahiti hover:bg-bermuda hover:text-black rounded-lg px-2 py-1"
-                        >
-                            Accept
-                        </button>
-
-                        <button
-                            onClick={() =>
-                            mutate({ id: req._id, status: "rejected" })
-                            }
-                            className="geo-regular-italic text-md bg-sunset rounded-lg px-2 py-1"
-                        >
-                            Reject
-                        </button>
-                        </div>
-                    )}
-                    </div>
-                ))}
+                    <button
+                      onClick={() =>
+                        mutate({ id: req._id, status: "rejected" })
+                      }
+                      className="px-3 py-1 text-xs rounded-lg bg-red-500 text-white hover:bg-red-600"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-        </> : 
-        <div className="h-[620px] flex items-center justify-center">
+          ))}
 
-            <div className="flex items-center justify-center gap-2">
-            No requests found <FaCircleExclamation className="text-gray-600" />
         </div>
+      ) : (
+        <div className="h-[60vh] flex flex-col items-center justify-center text-gray-500 gap-2">
+          <FaCircleExclamation size={24} />
+          <p>No {filter !== "all" ? filter : ""} requests found</p>
         </div>
-        )}
+      )}
     </div>
   );
 }

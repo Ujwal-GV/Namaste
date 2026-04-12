@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import MyProperties from "./pages/MyProperties";
 import AddProperty from "./pages/AddProperty";
 import Register from "./pages/Register";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthContext, AuthProvider } from "./context/AuthContext";
 import Navbar from "./pages/Navbar";
 import OwnerRequests from "./pages/OwnerRequests";
 import PropertyDetails from "./pages/PropertyDetails";
@@ -17,12 +17,16 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminOwners from "./pages/AdminOwners";
 import DetailsList from "./pages/admin/DetailsList";
 import AdminUserDetails from "./pages/admin/AdminUserDetails";
+import { useContext } from "react";
 
 function App() {
+  const  { user } = useContext(AuthContext);
+
   return (
     <AuthProvider>
       <BrowserRouter>
-      <Navbar />
+      {console.log(user?.role)}
+      { user?.role !== "admin" && <Navbar />}
         <Routes>
           {/* Public */}
           <Route path="/login" element={<Login />} />

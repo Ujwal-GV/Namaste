@@ -97,6 +97,14 @@
   border: 1px solid rgba( 255, 255, 255, 0.18 );
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* .geo-regular {
   font-family: "Geo", sans-serif;
   font-weight: 400;

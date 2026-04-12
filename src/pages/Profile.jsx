@@ -2,17 +2,20 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import API from "../api/axios";
-import { Button, Progress } from "antd";
+import { Progress, Tag } from "antd";
 import ProfileModal from "../components/ProfileModal";
 import ProfileAvatar from "../components/ProfileAvatar";
-import ProfileBadges from "../components/ProfileBadges";
+import SkeletonCard from "../components/SkeletonCard";
 import { MdEmail } from "react-icons/md";
 import { FaPhoneAlt } from "react-icons/fa";
 import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
-import { useGetProperties, useMyProperties } from "../hooks/useProperties";
+import { useMyProperties } from "../hooks/useProperties";
 import { TbError404 } from "react-icons/tb";
 import MyPropertyCard from "../components/MyPropertyCard";
-
+import { motion } from "framer-motion";
+import { ProfileSkeleton } from "../components/ProfileSkeleton";
+import ProfileBadges from "../components/ProfileBadges";
+import { RxCrossCircled } from "react-icons/rx";
 
 export default function Profile() {
   const { user } = useContext(AuthContext);
@@ -28,16 +31,13 @@ export default function Profile() {
 
   const userId = data?._id;
 
-  console.log("User Id", userId);
-
-  const { 
+  const {
     data: propertyData,
-    isLaoding: propertyDataIsLoading
+    isLoading: propertyLoading,
   } = useMyProperties(userId);
-  console.log("Property Data\t", propertyData)
 
   const getProfileCompletion = (user) => {
-    let total = 5;
+    let total = user?.role === "owner" ? 5 : 4;
     let completed = 0;
 
     if (user?.name) completed++;
@@ -50,103 +50,129 @@ export default function Profile() {
     return Math.round((completed / total) * 100);
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <ProfileSkeleton />;
+
+  const completion = getProfileCompletion(data);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6">
 
-      {/* HEADER */}
-      <div className="bg-white shadow rounded-2xl p-6 flex items-center gap-6">
+      <div className="bg-white shadow rounded-2xl p-5 flex items-center gap-5">
+        <ProfileAvatar image={data?.profilePic} />
 
-        <ProfileAvatar
-          image={data?.profilePic}
-          onUpload={(file) => {
-            console.log("Upload avatar", file);
-          }}
-        />
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">
+              {data?.name || "User"}
+            </h2>
 
-        <div>
-          <h2 className="text-2xl font-bold">
-            {data?.name || "User"}
-          </h2>
+            {data?.verificationStatus === "verified" && (
+              <Tag color="green">Verified</Tag>
+            )}
+          </div>
+
           <p className="text-gray-500 text-sm">
             ID: {user?.id}
           </p>
 
-          <Button
-            className="mt-2"
+          <button
             onClick={() => setOpen(true)}
+            className="mt-2 text-sm bg-black text-white px-3 py-1 rounded-lg"
           >
             Edit Profile
-          </Button>
+          </button>
         </div>
       </div>
 
-      {/* PROGRESS */}
-      <div className="bg-white shadow rounded-2xl p-6">
-        <h3 className="font-semibold mb-2">Profile Completion</h3>
-        <Progress percent={getProfileCompletion(data)} />
+      <div className="bg-white shadow rounded-2xl p-5">
+        <h3 className="font-semibold mb-3">
+          Profile Completion
+        </h3>
+
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${completion}%` }}
+          transition={{ duration: 0.8 }}
+          className="h-1 bg-black rounded-full"
+        />
+
+        <p className="text-sm text-gray-500 mt-2">
+          {completion}% completed
+        </p>
       </div>
 
-      {/* DETAILS */}
-      <div className="grid grid-cols-2 gap-4">
-        <ProfileBadges icon = { <MdEmail /> } text = {"Email"} value = { data?.email }/>
-        <ProfileBadges icon = { <FaPhoneAlt /> } text = {"Mobile"} value = { data?.mobile }/>
-        <ProfileBadges icon = { data?.accountStatus === "active" ? <CiCircleCheck className="bg-green-500 rounded-full" /> : <CiCircleRemove className="bg-red-500 rounded-full" /> } text = {"Account Status"} value = { data?.accountStatus }/>
-        <ProfileBadges icon = { <MdEmail /> } text = {"Verification Status"} value = { data?.verificationStatus }/>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <ProfileBadges icon={<MdEmail />} label="Email" value={data?.email} />
+        <ProfileBadges icon={<FaPhoneAlt />} label="Mobile" value={data?.mobile || "Not Added"} />
+        <ProfileBadges
+          icon={
+            data?.accountStatus === "active" ? (
+              <CiCircleCheck className="text-green-500" />
+            ) : (
+              <CiCircleRemove className="text-red-500" />
+            )
+          }
+          label="Account Status"
+          value={data?.accountStatus}
+        />
+        <ProfileBadges
+          icon={<MdEmail />}
+          label="Verification"
+          value={data?.verificationStatus}
+        />
       </div>
 
-      {/* DOCUMENTS */}
-      <div className="bg-white shadow rounded-2xl p-6">
+      <div className="bg-white shadow rounded-2xl p-5">
         <h3 className="font-semibold mb-3">Documents</h3>
 
-        <p>
-          ID Proof: {data?.documents?.idProof ? "✅ Uploaded" : "❌ Missing"}
-        </p>
+        <div className="space-y-2 text-sm">
+          <p className="flex gap-2">
+            ID Proof:{" "}
+            {data?.documents?.idProof ? <span className="flex gap-1 items-center">Uploaded<CiCircleCheck className="text-green-500" /></span> : <span className="flex gap-1 items-center">Missing<RxCrossCircled className="text-red-500" /></span>}
+          </p>
 
-        {data?.role === "owner" && (
-          <p>
-            Property Proof:{" "}
-            {data?.documents?.propertyProof ? "✅ Uploaded" : "❌ Missing"}
+          {data?.role === "owner" && (
+            <p className="flex gap-2">
+              Property Proof:{" "}
+              {data?.documents?.propertyProof
+                ? <span className="flex gap-1 items-center">Uploaded<CiCircleCheck className="text-green-500" /></span>
+                : <span className="flex gap-2 items-center"><RxCrossCircled /></span>}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-white shadow rounded-2xl p-5 h-[40vh] overflow-y-auto custom-scroll">
+        <h3 className="font-semibold mb-4 border-b pb-2">
+          My Properties
+        </h3>
+
+        {propertyLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : propertyData?.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {propertyData.map((p) => (
+              <MyPropertyCard key={p._id} property={p} />
+            ))}
+          </div>
+        ) : (
+          <p className="flex items-center justify-center gap-2 text-gray-500">
+            No Properties <TbError404 />
           </p>
         )}
       </div>
 
-      {/* PROPERTIES */}
-      <div className="bg-white shadow rounded-2xl p-6">
-        <h3 className="font-semibold mb-3 border-b-2">My Properties</h3>
-        <div className="p-2 h-[120px] overflow-y-auto custom-scroll">
-            {propertyDataIsLoading ? (
-                    <div className="grid md:grid-cols-3 gap-6">
-                      {[...Array(6)].map((_, i) => (
-                        <SkeletonCard key={i} />
-                      ))}
-                    </div>
-                  ) : (<>
-                      {propertyData?.length > 0 ? (
-                          <div className="grid md:grid-cols-3 gap-6">
-                              {propertyData.map((p) => (
-                                <MyPropertyCard key={p._id} property={p} />
-                              ))}
-                          </div>
-                      ) : (
-                          <p className="flex gap-2 mx-auto items-center justify-center w-full text-center p-2 bg-gray-100 rounded-md">Not Found <TbError404 /></p>
-                      )}
-                  </>
-                  )}
-        </div>
-      </div>
-
-      {/* REVIEWS */}
-      <div className="bg-white shadow rounded-2xl p-6">
+      <div className="bg-white shadow rounded-2xl p-5">
         <h3 className="font-semibold mb-3">My Reviews</h3>
-
-        <p className="text-gray-500">
-          (Will integrate with review system)
+        <p className="text-gray-500 text-sm">
+          Review system coming soon...
         </p>
       </div>
 
-      {/* MODAL */}
       <ProfileModal
         open={open}
         onClose={() => {
