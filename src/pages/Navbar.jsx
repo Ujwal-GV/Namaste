@@ -70,33 +70,35 @@ export default function Navbar() {
                     <FiFileText /> Applications
                   </NavLink>
                 ):(
-                  <NavLink
-                    to="/user-applications"
-                    onClick={() => setMenuOpen(false)}
-                    className={({ isActive }) =>
-                        `px-3 py-2 flex items-center gap-2 ${
+                  <>
+                    <NavLink
+                      to="/user-applications"
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) =>
+                          `px-3 py-2 flex items-center gap-2 ${
+                            isActive
+                              ? "border-b-2 border-black font-semibold"
+                              : "text-gray-500"
+                          }`
+                        }
+                    >
+                      <FiPlusSquare /> My Requests
+                    </NavLink>
+
+                    <NavLink
+                      to="/apply-owner"
+                      className={({ isActive }) =>
+                        `px-3 py-2 ${
                           isActive
                             ? "border-b-2 border-black font-semibold"
                             : "text-gray-500"
                         }`
                       }
-                  >
-                    <FiPlusSquare /> My Requests
-                  </NavLink>
+                    >
+                      Ownership
+                    </NavLink>
+                  </>
               )}
-
-                <NavLink
-                  to="/apply-owner"
-                  className={({ isActive }) =>
-                    `px-3 py-2 ${
-                      isActive
-                        ? "border-b-2 border-black font-semibold"
-                        : "text-gray-500"
-                    }`
-                  }
-                >
-                  Ownership
-                </NavLink>
               </>
             )}
 
@@ -228,34 +230,36 @@ export default function Navbar() {
                 <FiFileText /> Applications
               </NavLink>
             ):(
-              <NavLink
-                to="/user-applications"
+              <>
+                <NavLink
+                  to="/user-applications"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-3 rounded-xl ${
+                      isActive
+                        ? "bg-gray-200 "
+                        : "hover:bg-gray-100 text-gray-700"
+                    }`
+                  }
+                >
+                  <FiPlusSquare /> My Requests
+                </NavLink>
+
+                <NavLink
+                to="/apply-owner"
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-xl ${
                     isActive
-                      ? "bg-gray-200 "
+                      ? "bg-gray-200"
                       : "hover:bg-gray-100 text-gray-700"
                   }`
                 }
               >
-                <FiPlusSquare /> My Requests
+                <FiUserCheck /> Ownership
               </NavLink>
+              </>
           )}
-
-          <NavLink
-            to="/apply-owner"
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl ${
-                isActive
-                  ? "bg-gray-200"
-                  : "hover:bg-gray-100 text-gray-700"
-              }`
-            }
-          >
-            <FiUserCheck /> Ownership
-          </NavLink>
         </div>
 
         <div className="absolute bottom-0 w-full p-4 border-t">
