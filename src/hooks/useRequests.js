@@ -55,15 +55,19 @@ export const useUpdateRequest = () => {
 };
 
 export const useApplyOwner = () => {
+const qc = useQueryClient();
+const navigate = useNavigate();
+
     return useMutation({
     mutationFn: (data) => {
         console.log("Apply Owner", data);
-        return API.put("/user/update-profile", data);
+        return API.post("/user/apply-owner", data);
     },
     onSuccess: (res) => {
       console.log("Response: ", res.data);
-      
-        toast.success(res?.data?.message || "Your request has been submitted");
+      qc.invalidateQueries["user-profile"];
+      navigate("/");
+      toast.success(res?.data?.message || "Your request has been submitted");
     },
     onError: (error) => {
         console.log("Error applying owner:\t", error);
@@ -93,4 +97,16 @@ export const useMyRequest = (propertyId, token) => {
     },
     enabled: !!propertyId && !!token,
   });
+};
+
+export const getUserApplications = (id) => {
+  return useQuery({
+    queryKey: ["user-applications"],
+    queryFn: async () => {
+      const res = await API.get(`/user/user-applications/${id}`);
+      return res.data;
+    },
+    staleTime: 5000,
+    gcTime: 5000,
+  })
 };

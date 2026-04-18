@@ -1,6 +1,7 @@
 import { useMyProperties } from "../hooks/useProperties";
 import PropertyCard from "../components/PropertyCard";
 import { useParams } from "react-router-dom";
+import SkeletonCard from "../components/SkeletonCard";
 
 export default function MyProperties() {
   const { id } = useParams();
@@ -11,7 +12,11 @@ export default function MyProperties() {
       <h2 className="text-2xl font-bold mb-4">My Properties</h2>
 
       {isLoading ? (
-        <p>Loading...</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       ) : (
         <div className="grid md:grid-cols-3 gap-6">
           {data?.map((p) => (

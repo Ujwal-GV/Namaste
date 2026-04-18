@@ -22,8 +22,6 @@ export default function Navbar() {
           <NavLink to="/" className="text-xl font-bold">
             Namaste
           </NavLink>
-          {console.log(user)}
-
           <div className="hidden md:flex gap-6 items-center">
             {token && user?.role !== "admin" && (
               <>
@@ -57,18 +55,35 @@ export default function Navbar() {
                   </>
                 )}
 
-                <NavLink
-                  to="/owner-requests"
-                  className={({ isActive }) =>
-                    `px-3 py-2 ${
-                      isActive
-                        ? "border-b-2 border-black font-semibold"
-                        : "text-gray-500"
-                    }`
-                  }
-                >
-                  Applications
-                </NavLink>
+                {user?.role === "owner" ? (
+                  <NavLink
+                    to="/owner-requests"
+                    onClick={() => setMenuOpen(false)}
+                    className={({ isActive }) =>
+                        `px-3 py-2 flex items-center gap-2 ${
+                          isActive
+                            ? "border-b-2 border-black font-semibold"
+                            : "text-gray-500"
+                        }`
+                      }
+                  >
+                    <FiFileText /> Applications
+                  </NavLink>
+                ):(
+                  <NavLink
+                    to="/user-applications"
+                    onClick={() => setMenuOpen(false)}
+                    className={({ isActive }) =>
+                        `px-3 py-2 flex items-center gap-2 ${
+                          isActive
+                            ? "border-b-2 border-black font-semibold"
+                            : "text-gray-500"
+                        }`
+                      }
+                  >
+                    <FiPlusSquare /> My Requests
+                  </NavLink>
+              )}
 
                 <NavLink
                   to="/apply-owner"
@@ -86,7 +101,7 @@ export default function Navbar() {
             )}
 
             {!token ? (
-              <NavLink className="bg-black text-white px-4 py-2 rounded">
+              <NavLink to={"/login"} className="bg-black text-white px-4 py-2 rounded">
                 Login
               </NavLink>
             ) : (
@@ -107,7 +122,6 @@ export default function Navbar() {
               </div>
             )}
           </div>
-          
 
           <div className="flex items-center gap-3 md:hidden">
             {token && (
@@ -198,19 +212,36 @@ export default function Navbar() {
             </>
           )}
 
-          <NavLink
-            to="/owner-requests"
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl ${
-                isActive
-                  ? "bg-gray-200"
-                  : "hover:bg-gray-100 text-gray-700"
-              }`
-            }
-          >
-            <FiFileText /> Applications
-          </NavLink>
+          {user?.role === "owner" ? (
+            
+              <NavLink
+                to="/owner-requests"
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl ${
+                    isActive
+                      ? "bg-gray-200"
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`
+                }
+              >
+                <FiFileText /> Applications
+              </NavLink>
+            ):(
+              <NavLink
+                to="/user-applications"
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl ${
+                    isActive
+                      ? "bg-gray-200 "
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`
+                }
+              >
+                <FiPlusSquare /> My Requests
+              </NavLink>
+          )}
 
           <NavLink
             to="/apply-owner"

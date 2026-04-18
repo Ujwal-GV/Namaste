@@ -9,6 +9,7 @@ export default function AdminOwners() {
     queryKey: ["pending-owners"],
     queryFn: async () => {
       const res = await API.get("/admin/owner-requests");
+      console.log("Owner requests", res);
       return res.data;
     },
   });

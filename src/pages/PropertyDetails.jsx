@@ -18,11 +18,14 @@ import { GiNotebook } from "react-icons/gi";
 import ImageCarousel from "../components/ImageCarousel";
 import SkeletonCard from "../components/SkeletonCard";
 import SkeletonPropertyDetails from "../components/SkeletonPropertyDetails";
+import { IoIosCheckmarkCircle, IoMdCloseCircle  } from "react-icons/io";
+import { Loader2Icon } from "lucide-react";
+
 
 export default function PropertyDetails() {
   const { id } = useParams();
   const { token, user } = useContext(AuthContext);
-  const { mutate } = useApply();
+  const { mutate, isPending } = useApply();
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -65,7 +68,8 @@ export default function PropertyDetails() {
         <div className="space-y-6">
 
           <div className="bg-white shadow rounded-2xl p-5 space-y-3">
-
+{console.log("Data", data.createdBy._id, "PripertyId", id, "usEr", user.id)
+                    }
             <h1 className="text-2xl font-bold">{data.title}</h1>
 
             <p className="flex items-center gap-2 text-gray-600">
@@ -114,21 +118,34 @@ export default function PropertyDetails() {
                         message: "Interested in this property",
                       })
                     }
-                    className="w-full py-3 rounded-xl bg-black text-white"
+                    className="w-full py-3 rounded-xl bg-black text-white flex justify-center"
                   >
-                    Apply
+                    {isPending ? <Loader2Icon className="animatespin-slow-reverse" /> : "Apply"}
                   </button>
                 ) : myRequest.status === "pending" ? (
                   <button className="w-full py-3 rounded-xl bg-yellow-400 text-white flex items-center justify-center gap-2 cursor-not-allowed">
                     Pending <IoIosHourglass />
                   </button>
-                ) : myRequest.status === "accepted" ? (
-                  <button className="w-full py-3 rounded-xl bg-green-500 text-white flex items-center justify-center gap-2">
-                    Approved ✅
-                  </button>
-                ) : (
-                  <button className="w-full py-3 rounded-xl bg-red-500 text-white flex items-center justify-center gap-2">
-                    Rejected ❌
+                ) : myRequest?.status === "accepted" ? (
+                    <button
+                      onClick={async () => {
+                        const res = await API.post("/conversations", {
+                          propertyId: id,
+                          userId: user.id,
+                          ownerId: data.createdBy._id,
+                      });
+
+                      console.log(res.data, "ID");
+                      
+                        navigate(`/chat/${res.data._id}`);
+                      }}
+                      className="w-full py-3 mt-3 rounded-xl bg-black text-white"
+                    >
+                      Chat with Owner
+                    </button>
+                  ) : (
+                  <button className="w-full py-3 rounded-xl bg-red-500 text-white flex items-center justify-center gap-2 cursor-not-allowed">
+                    Rejected <IoMdCloseCircle />
                   </button>
                 )}
               </>

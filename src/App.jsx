@@ -18,6 +18,8 @@ import AdminOwners from "./pages/AdminOwners";
 import DetailsList from "./pages/admin/DetailsList";
 import AdminUserDetails from "./pages/admin/AdminUserDetails";
 import { useContext } from "react";
+import Chat from "./components/Chat";
+import UserApplications from "./pages/UserApplications";
 
 function App() {
   const  { user } = useContext(AuthContext);
@@ -66,6 +68,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <OwnerRequests />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/user-applications"
+            element={
+              <ProtectedRoute>
+                <UserApplications />
               </ProtectedRoute>
             }
           />
@@ -129,6 +140,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminUserDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/chat/:id"
+            element={
+              <ProtectedRoute>
+                <Chat />
               </ProtectedRoute>
             }
           />

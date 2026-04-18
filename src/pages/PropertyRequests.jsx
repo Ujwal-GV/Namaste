@@ -4,11 +4,12 @@ import SkeletonCard from "../components/SkeletonCard";
 import { getPropertyRequests, useUpdateRequest } from "../hooks/useRequests";
 import { FaCircleExclamation } from "react-icons/fa6";
 import { IoHomeOutline } from "react-icons/io5";
+import { Loader2Icon } from "lucide-react";
 
 export default function PropertyRequests() {
   const { id } = useParams();
   const { data, isLoading } = getPropertyRequests(id);
-  const { mutate } = useUpdateRequest();
+  const { mutate, isPending } = useUpdateRequest();
 
   const [filter, setFilter] = useState("all");
 
@@ -102,18 +103,18 @@ export default function PropertyRequests() {
                       onClick={() =>
                         mutate({ id: req._id, status: "accepted" })
                       }
-                      className="px-3 py-1 text-xs rounded-lg bg-green-500 text-white hover:bg-green-600"
+                      className="px-3 py-1 text-xs rounded-lg bg-green-500 text-white hover:bg-green-600 flex justify-center"
                     >
-                      Accept
+                      {isPending ? <Loader2Icon className="animatespin-slow-reverse" /> : "Accept"}
                     </button>
 
                     <button
                       onClick={() =>
                         mutate({ id: req._id, status: "rejected" })
                       }
-                      className="px-3 py-1 text-xs rounded-lg bg-red-500 text-white hover:bg-red-600"
+                      className="px-3 py-1 text-xs rounded-lg bg-red-500 text-white hover:bg-red-600 flex justify-center"
                     >
-                      Reject
+                      {isPending ? <Loader2Icon className="animatespin-slow-reverse" /> : "Reject"}
                     </button>
                   </div>
                 )}

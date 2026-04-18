@@ -92,7 +92,21 @@ export default function OwnerRequests() {
                   <div className="flex gap-2">
                     <button
                       onClick={() =>
-                        mutate({ id: req._id, status: "accepted" })
+                        mutate({ id: req._id, status: "accepted" },
+                            {
+                                onSuccess: async (res) => {
+                                    const convoRes = await API.post("/conversation", {
+                                    propertyId: req.propertyId,
+                                    userId: req.userId,
+                                    ownerId: req.ownerId,
+                                    });
+
+                                    const conversationId = convoRes.data._id;
+
+                                    navigate(`/chat/${conversationId}`);
+                                },
+                                }
+                        )
                       }
                       className="px-3 py-1 text-xs rounded-lg bg-green-500 text-white hover:bg-green-600"
                     >
