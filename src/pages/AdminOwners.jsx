@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import API from "../api/axios";
 import toast from "react-hot-toast";
@@ -6,6 +6,7 @@ import SkeletonCard from "../components/SkeletonCard";
 import { Modal } from "antd";
 import { LuLoaderCircle } from "react-icons/lu";
 import { IoDocuments } from "react-icons/io5";
+import useDebounce from "../hooks/useDebounce";
 
 
 export default function AdminOwners() {
@@ -17,6 +18,8 @@ export default function AdminOwners() {
   const [activeTab, setActiveTab] = useState("pending");
   const [selectedUser, setSelectedUser] = useState(null);
 
+  const debouncedSearch = useDebounce(search, 500);
+
   const { data, isLoading } = useQuery({
     queryKey: ["owner-requests", page, activeTab, search, limit],
     queryFn: async () => {
@@ -25,11 +28,12 @@ export default function AdminOwners() {
           page,
           limit,
           status: activeTab,
-          search,
+          search: debouncedSearch,
         }
       });
       return res.data;
     },
+    enabled: true,
   });
 
   const approveMutation = useMutation({
@@ -76,7 +80,9 @@ export default function AdminOwners() {
   
   
 
-  const users = data?.data || [];
+  const users = useMemo(() => {
+    return data?.data || [];
+  }, [data]);
 
 console.log("data", data);
 

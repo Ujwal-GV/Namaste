@@ -4,14 +4,19 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { IoMdLogOut } from "react-icons/io";
 import { FaUserCircle } from "react-icons/fa";
 import { FiFileText, FiHome, FiMenu, FiPlusSquare, FiUserCheck } from "react-icons/fi";
+import { Modal } from "antd";
+import toast from "react-hot-toast";
 
 export default function Navbar() {
   const { token, logout, user } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const handleLogout = () => {
     logout();
+    toast.success("Logged out successfully");
     navigate("/login");
   };
 
@@ -116,7 +121,9 @@ export default function Navbar() {
                 </NavLink>
 
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    setConfirmOpen(true);
+                  }}
                   className="bg-red-600 text-white p-2 rounded-full"
                 >
                   <IoMdLogOut />
@@ -280,6 +287,13 @@ export default function Navbar() {
             </button>
           )}
         </div>
+        <Modal
+          open={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          onOk={handleLogout}
+        >
+          <p className="font-semibold">Confirm Logout?</p>
+        </Modal>
       </div>
     </>
   );

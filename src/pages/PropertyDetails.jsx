@@ -29,6 +29,8 @@ export default function PropertyDetails() {
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
+  console.log("USER IN PROPERTY DETAILS", user);
+
   const { data: myRequest } = useMyRequest(id, token);
   const navigate = useNavigate();
 
@@ -102,82 +104,86 @@ export default function PropertyDetails() {
             </p>
           </div>
 
-          <div className="bg-white shadow rounded-2xl p-5">
+          {
+            user?.role !== "admin" && (
+              <div className="bg-white shadow rounded-2xl p-5">
 
-            {user?.role !== "owner" ? (
-              <>
-                {!token ? (
-                  <button className="w-full py-3 rounded-xl bg-gray-300 text-gray-500">
-                    Login to Apply
-                  </button>
-                ) : !myRequest ? (
-                  <button
-                    onClick={() =>
-                      mutate({
-                        propertyId: id,
-                        message: "Interested in this property",
-                      })
-                    }
-                    className="w-full py-3 rounded-xl bg-black text-white flex justify-center"
-                  >
-                    {isPending ? <Loader2Icon className="animatespin-slow-reverse" /> : "Apply"}
-                  </button>
-                ) : myRequest.status === "pending" ? (
-                  <button className="w-full py-3 rounded-xl bg-yellow-400 text-white flex items-center justify-center gap-2 cursor-not-allowed">
-                    Pending <IoIosHourglass />
-                  </button>
-                ) : myRequest?.status === "accepted" ? (
-                    <button
-                      onClick={async () => {
-                        const res = await API.post("/conversations", {
-                          propertyId: id,
-                          userId: user.id,
-                          ownerId: data.createdBy._id,
-                      });
+                {user?.role !== "owner" ? (
+                  <>
+                    {!token ? (
+                      <button className="w-full py-3 rounded-xl bg-gray-300 text-gray-500">
+                        Login to Apply
+                      </button>
+                    ) : !myRequest ? (
+                      <button
+                        onClick={() =>
+                          mutate({
+                            propertyId: id,
+                            message: "Interested in this property",
+                          })
+                        }
+                        className="w-full py-3 rounded-xl bg-black text-white flex justify-center"
+                      >
+                        {isPending ? <Loader2Icon className="animatespin-slow-reverse" /> : "Apply"}
+                      </button>
+                    ) : myRequest.status === "pending" ? (
+                      <button className="w-full py-3 rounded-xl bg-yellow-400 text-white flex items-center justify-center gap-2 cursor-not-allowed">
+                        Pending <IoIosHourglass />
+                      </button>
+                    ) : myRequest?.status === "accepted" ? (
+                        <button
+                          onClick={async () => {
+                            const res = await API.post("/conversations", {
+                              propertyId: id,
+                              userId: user.id,
+                              ownerId: data.createdBy._id,
+                          });
 
-                      console.log(res.data, "ID");
-                      
-                        navigate(`/chat/${res.data._id}`);
-                      }}
-                      className="w-full py-3 mt-3 rounded-xl bg-black text-white"
+                          console.log(res.data, "ID");
+                          
+                            navigate(`/chat/${res.data._id}`);
+                          }}
+                          className="w-full py-3 mt-3 rounded-xl bg-black text-white"
+                        >
+                          Chat with Owner
+                        </button>
+                      ) : (
+                      <button className="w-full py-3 rounded-xl bg-red-500 text-white flex items-center justify-center gap-2 cursor-not-allowed">
+                        Rejected <IoMdCloseCircle />
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex gap-3">
+                    <Link
+                      to={`/property-requests/${id}`}
+                      className="flex-1 bg-blue-500 text-white py-2 rounded-xl flex justify-center"
                     >
-                      Chat with Owner
+                      <GiNotebook />
+                    </Link>
+
+                    <button
+                      onClick={() => setEditOpen(true)}
+                      className="flex-1 bg-black text-white py-2 rounded-xl flex justify-center"
+                    >
+                      <MdModeEditOutline />
                     </button>
-                  ) : (
-                  <button className="w-full py-3 rounded-xl bg-red-500 text-white flex items-center justify-center gap-2 cursor-not-allowed">
-                    Rejected <IoMdCloseCircle />
-                  </button>
+
+                    <button
+                      onClick={() => setConfirmDeleteModal(true)}
+                      className="flex-1 bg-red-500 text-white py-2 rounded-xl flex justify-center"
+                    >
+                      {deleteMutation.isPending ? (
+                        <AiOutlineLoading3Quarters className="animate-spin mx-auto" />
+                      ) : (
+                        <MdDeleteOutline />
+                      )}
+                    </button>
+                  </div>
                 )}
-              </>
-            ) : (
-              <div className="flex gap-3">
-                <Link
-                  to={`/property-requests/${id}`}
-                  className="flex-1 bg-blue-500 text-white py-2 rounded-xl flex justify-center"
-                >
-                  <GiNotebook />
-                </Link>
-
-                <button
-                  onClick={() => setEditOpen(true)}
-                  className="flex-1 bg-black text-white py-2 rounded-xl flex justify-center"
-                >
-                  <MdModeEditOutline />
-                </button>
-
-                <button
-                  onClick={() => setConfirmDeleteModal(true)}
-                  className="flex-1 bg-red-500 text-white py-2 rounded-xl flex justify-center"
-                >
-                  {deleteMutation.isPending ? (
-                    <AiOutlineLoading3Quarters className="animate-spin mx-auto" />
-                  ) : (
-                    <MdDeleteOutline />
-                  )}
-                </button>
               </div>
-            )}
-          </div>
+            )
+          }
 
           <div className="bg-white shadow rounded-2xl p-5">
             <h3 className="font-semibold mb-3">Reviews</h3>
