@@ -20,6 +20,8 @@ import AdminUserDetails from "./pages/admin/AdminUserDetails";
 import { useContext } from "react";
 import Chat from "./components/Chat";
 import UserApplications from "./pages/UserApplications";
+import UserLayout from "./pages/UserLayout";
+import AdminLayout from "./pages/AdminLayout";
 
 function App() {
   const  { user } = useContext(AuthContext);
@@ -28,130 +30,132 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
       {console.log(user?.role)}
-      { user?.role !== "admin" && <Navbar />}
         <Routes>
           {/* Public */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
           {/* Protected */}
-          <Route path="/" element={ <Home /> }
-          />
+          <Route element = { <UserLayout /> }>
+            <Route path="/" element={ <Home /> } />
 
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/my-properties/:id" element={
-              <ProtectedRoute>
-                <MyProperties />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/my-properties/:id" element={
+                <ProtectedRoute>
+                  <MyProperties />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/add-property" element={
-              <ProtectedRoute>
-                <AddProperty />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/add-property" element={
+                <ProtectedRoute>
+                  <AddProperty />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/owner-requests"
-            element={
-              <ProtectedRoute>
-                <OwnerRequests />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/owner-requests"
+              element={
+                <ProtectedRoute>
+                  <OwnerRequests />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/user-applications"
-            element={
-              <ProtectedRoute>
-                <UserApplications />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/user-applications"
+              element={
+                <ProtectedRoute>
+                  <UserApplications />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/property/:id"
-            element={
-              // <ProtectedRoute>
-                <PropertyDetails />
-              // </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/property/:id"
+              element={
+                // <ProtectedRoute>
+                  <PropertyDetails />
+                // </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/apply-owner"
-            element={
-              <ProtectedRoute>
-                <ApplyOwner />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/apply-owner"
+              element={
+                <ProtectedRoute>
+                  <ApplyOwner />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/property-requests/:id"
-            element={
-              <ProtectedRoute>
-                <PropertyRequests />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/property-requests/:id"
+              element={
+                <ProtectedRoute>
+                  <PropertyRequests />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/chat/:id"
+              element={
+                <ProtectedRoute>
+                  <Chat />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
 
-          <Route
-            path="/admin/owners"
-            element={
-              <ProtectedRoute>
-                <AdminOwners />
-              </ProtectedRoute>
-            }
-          />
+          <Route element = { <AdminLayout /> }>
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin/list"
-            element={
-              <ProtectedRoute>
-                <DetailsList />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin/owners"
+              element={
+                <ProtectedRoute>
+                  <AdminOwners />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin/user/:id"
-            element={
-              <ProtectedRoute>
-                <AdminUserDetails />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin/list"
+              element={
+                <ProtectedRoute>
+                  <DetailsList />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/chat/:id"
-            element={
-              <ProtectedRoute>
-                <Chat />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin/user/:id"
+              element={
+                <ProtectedRoute>
+                  <AdminUserDetails />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

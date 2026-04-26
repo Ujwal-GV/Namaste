@@ -41,9 +41,9 @@ export default function DetailsList() {
   }, [data, search, roleFilter, statusFilter, sort]);
 
   return (
-    <div className="w-full min-h-screen p-4 custom-background-color space-y-4">
+    <div className="w-full min-h-screen custom-background-color space-y-4">
 
-      <div className="bg-gray-800 p-4 rounded-xl shadow flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div className="bg-gray-800 p-4 shadow flex flex-col md:flex-row gap-3 items-center justify-between">
 
         <input
           type="text"
@@ -86,7 +86,7 @@ export default function DetailsList() {
       </div>
 
       {filteredUsers?.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-2">
           {filteredUsers.map((user) => (
             <DetailsCard key={user._id} details={user} />
           ))}

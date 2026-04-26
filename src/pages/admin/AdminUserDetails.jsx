@@ -9,7 +9,8 @@ import { useMyProperties } from "../../hooks/useProperties";
 import { useUpdateUserStatus } from "../../hooks/useAdmin";
 import { MdBlock, MdLocationPin } from "react-icons/md";
 import { CgUnblock } from "react-icons/cg";
-
+import { FaEye } from "react-icons/fa";
+import { IoIosPeople } from "react-icons/io";
 
 export default function AdminUserDetails() {
   const { id } = useParams();
@@ -97,7 +98,7 @@ export default function AdminUserDetails() {
         <div className="lg:col-span-1 space-y-4">
 
           {/* USER INFO */}
-        <div className="bg-white p-5 rounded-2xl shadow grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white p-5 rounded-md shadow grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h2 className="text-xl md:text-2xl font-bold">{data?.name}</h2>
             <p className="text-gray-500 text-sm">{data?.email}</p>
@@ -126,13 +127,13 @@ export default function AdminUserDetails() {
             </button>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl shadow space-y-2">
+        <div className="bg-white p-5 rounded-md shadow space-y-2">
           <h3 className="font-semibold text-lg">Basic Info</h3>
           <p>Mobile: {data?.mobile || "N/A"}</p>
           <p>Joined: {new Date(data?.createdAt).toLocaleDateString()}</p>
         </div>
 
-      <div className="bg-white p-5 rounded-2xl shadow space-y-2">
+      <div className="bg-white p-5 rounded-md shadow space-y-2">
         <h3 className="font-semibold text-lg">Documents</h3>
 
         <p>
@@ -169,7 +170,7 @@ export default function AdminUserDetails() {
       </div>
 
       {data?.role === "user" && (
-        <div className="bg-white p-5 rounded-2xl shadow">
+        <div className="bg-white p-5 rounded-md shadow">
           <h3 className="font-semibold text-lg mb-3">
             Applications
           </h3>
@@ -201,7 +202,7 @@ export default function AdminUserDetails() {
       )}
 
           {/* PROPERTY LIST */}
-          <div className="bg-white p-4 rounded-2xl shadow">
+          <div className="bg-white p-4 rounded-md shadow">
             <h3 className="font-semibold mb-3">Properties</h3>
 
             {propertyLoading ? (
@@ -233,20 +234,27 @@ export default function AdminUserDetails() {
         <div className="lg:col-span-2">
 
           {!selectedProperty ? (
-            <div className="bg-white rounded-2xl p-6 shadow flex items-center justify-center h-full">
+            <div className="bg-white rounded-md p-6 shadow flex items-center justify-center h-full">
               <p className="text-gray-400">
                 Select a property to view details
               </p>
             </div>
           ) : (
-            <div className="bg-white h-[121vh] rounded-2xl p-6 shadow space-y-4">
+            <div className="bg-white h-[116vh] rounded-md p-6 shadow space-y-4">
 
-              <h2 className="text-xl font-bold">
-                {selectedProperty.title}
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold">
+                  {selectedProperty.title}
+                </h2>
+                <Link 
+                  to={`/property/${selectedProperty?._id}`}
+                  className="bg-black text-white px-2 py-1 rounded-md hover:bg-gray-700 flex items-center gap-2 text-sm">
+                  View <FaEye />
+                </Link>
+              </div>
 
-              <p className="text-gray-500">
-                {selectedProperty.location}
+              <p className="text-gray-500 flex items-center gap-1">
+                <MdLocationPin className="text-red-600" />{selectedProperty.location}
               </p>
 
               <p className="text-lg font-semibold">
@@ -298,9 +306,12 @@ export default function AdminUserDetails() {
                 </div>
 
                 <div className="pt-4 border-t">
-                  <h3 className="font-semibold mb-3">Applications for this property</h3>
+                  <span className="flex justify-between">
+                    <h3 className="font-semibold mb-3">Applications for this property</h3>
+                    <p className="flex items-center gap-1">{applications?.length}<IoIosPeople className="text-2xl text-black" /></p>
+                  </span>
 
-                  <div className="h-[22vh] overflow-y-auto">
+                  <div className="h-[26vh] overflow-y-auto">
                     {appLoading ? (
                       [...Array(3)].map((_, i) => <SkeletonCard key={i} />)
                     ) : applications?.length > 0 ? (
@@ -332,16 +343,7 @@ export default function AdminUserDetails() {
                   </div>
                 </div>
 
-              </div>
-
-              {/* future expansion */}
-              <div className="pt-3 border-t">
-                <Link 
-                  to={`/property/${selectedProperty?._id}`}
-                  className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-700">
-                  View Full Property
-                </Link>
-              </div>
+              </div>              
 
             </div>
           )}

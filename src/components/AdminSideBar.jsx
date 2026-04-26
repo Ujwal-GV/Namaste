@@ -23,9 +23,7 @@ export default function AdminSidebar() {
   return (
     <div className="w-64 dashboard-card shadow p-4 min-h-screen text-white">
       <nav className="space-y-2">
-        <h2 className="p-1">WELCOME BACK</h2>
-        <hr />
-        <NavLink to="/admin" className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ""}`}>
+        <NavLink to="/admin/dashboard" className={({ isActive }) => `${linkClass} ${isActive ? activeClass : ""}`}>
           Dashboard
         </NavLink>
 

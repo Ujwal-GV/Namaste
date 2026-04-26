@@ -105,9 +105,9 @@ console.log("data", data);
   const tabs = ["all", "pending", "approved", "rejected"];
 
   return (
-    <div className="md:p-6 space-y-5 custom-background-color min-h-screen p-4">
+    <div className="space-y-5 custom-background-color min-h-screen p-">
 
-      <div className="bg-gray-800 p-4 rounded-xl shadow flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div className="bg-gray-800 p-4 shadow flex flex-col md:flex-row gap-3 items-center justify-between">
 
         <h2 className="text-2xl font-bold text-white">Owner Approvals</h2>
 
@@ -138,13 +138,13 @@ console.log("data", data);
       </div>
 
       {isLoading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
           {[...Array(6)].map((_, i) => (
             <SkeletonCard key={i} />
           ))}
         </div>
       ) : filtered.length > 0 ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
           {filtered.map((user) => (
             
             <div
@@ -152,11 +152,11 @@ console.log("data", data);
               className="dashboard-card p-4 rounded-2xl shadow hover:shadow-lg transition flex flex-col justify-between"
             >
               <div>
-                <p className="font-semibold text-white text-lg">{user.name}</p>
-                <p className="text-sm text-white">{user.email}</p>
+                <p className="font-semibold text-white text-lg truncate">{user.name}</p>
+                <p className="text-sm text-white truncate">{user.email}</p>
               </div>
 
-              <div className="my-3 flex justify-between items-center">
+              <div className="my-3 flex justify-between flex-col gap-2 lg:flex-row md:flex-row items-center truncate">
                 <span
                   className={`text-xs px-3 py-1 rounded-full font-semibold uppercase
                     ${
@@ -172,9 +172,9 @@ console.log("data", data);
                 <button
                     title="Documents"
                     onClick={() => setSelectedUser(user)}
-                    className="flex items-center gap-2 text-sm p-2 text-black bg-gray-200 rounded-xl hover:bg-gray-400"
+                    className="flex items-center gap-2 text-sm px-3 py-1 text-black bg-gray-200 rounded-xl hover:bg-gray-400"
                   >
-                    <IoDocuments /> View Documents
+                    <IoDocuments /> <span className="sm:hidden lg:block md:block">View Documents</span>
                   </button>
               </div>
 

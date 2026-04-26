@@ -21,21 +21,8 @@ export default function AdminDashboard() {
   return (
     <div className="flex min-h-screen bg-gray-100">
 
-      {/* MOBILE SIDEBAR */}
-      <div className="md:hidden fixed top-4 right-4 z-50">
-        <button
-          onClick={() => setOpen(true)}
-          className="bg-black text-white p-2 rounded-lg"
-        >
-          <Menu />
-        </button>
-      </div>
-
       {open && (
         <div className="fixed inset-0 z-40 flex">
-          <div className="w-64 bg-white shadow-lg">
-            <AdminSidebar />
-          </div>
           <div
             className="flex-1 bg-black/40"
             onClick={() => setOpen(false)}
@@ -44,12 +31,29 @@ export default function AdminDashboard() {
       )}
 
       {/* DESKTOP SIDEBAR */}
-      <div className="hidden md:block md:min-h-screen">
-        <AdminSidebar />
-      </div>
 
       {/* MAIN CONTENT */}
       <div className="flex-1 p-4 sm:p-6 space-y-6 w-full">
+        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b px-4 sm:px-6 py-3 flex items-center justify-between">
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setOpen(true)}
+              className="md:hidden bg-black text-white p-2 rounded-lg"
+            >
+              <Menu size={18} />
+            </button>
+
+            <h1 className="text-lg sm:text-xl font-semibold">
+              Dashboard
+            </h1>
+          </div>
+
+          <div className="text-sm text-gray-500">
+            Welcome, Admin
+          </div>
+
+        </div>
 
         <h1 className="text-xl sm:text-2xl font-bold">
           Admin Dashboard
@@ -75,8 +79,17 @@ export default function AdminDashboard() {
         </div>
 
         {/* CHART */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow overflow-x-auto">
-          <RequestChart data={data} />
+        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow flex flex-col gap-3">
+
+          <div className="flex justify-between items-center">
+            <h2 className="font-semibold">Requests Overview</h2>
+            <span className="text-xs text-gray-400">Last 7 days</span>
+          </div>
+
+          <div className="w-full overflow-x-auto">
+            <RequestChart data={data} />
+          </div>
+
         </div>
 
       </div>
