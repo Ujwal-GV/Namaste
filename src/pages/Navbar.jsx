@@ -3,22 +3,41 @@ import { AuthContext } from "../context/AuthContext";
 import { NavLink, useNavigate } from "react-router-dom";
 import { IoMdLogOut } from "react-icons/io";
 import { FaUserCircle } from "react-icons/fa";
-import { FiFileText, FiHome, FiMenu, FiPlusSquare, FiUserCheck } from "react-icons/fi";
+import { FiBell, FiFileText, FiHome, FiMenu, FiPlusSquare, FiUserCheck } from "react-icons/fi";
 import { Modal } from "antd";
 import toast from "react-hot-toast";
+import { LiaCheckDoubleSolid } from "react-icons/lia";
+import { IoTrashBin } from "react-icons/io5";
+import { HiBell } from "react-icons/hi";
+import { getNotifications, useDeleteAllNotifications, useDeleteSingleNotification, useMarkRead } from "../hooks/useNotifications";
+import { IoClose } from "react-icons/io5";
+import { LuLoader } from "react-icons/lu";
 
 export default function Navbar() {
   const { token, logout, user } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { data } = getNotifications();
+  const [ openNotifications, setOpenNotifications ] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const unread = data?.filter(n => !n.isRead).length;
 
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const { mutate } = useMarkRead();
+  const { mutate: deleteNotification } = useDeleteSingleNotification();
+  const { mutate: deleteAllNotifications, isPending: isDeleteAllNotificationsPending } = useDeleteAllNotifications();
 
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully");
     navigate("/login");
   };
+
+  console.log("Notifications", data);
+  
 
   return (
     <>
@@ -115,16 +134,83 @@ export default function Navbar() {
               <div className="flex gap-3">
                 <NavLink
                   to="/profile"
-                  className="bg-gray-600 text-white p-2 rounded-full"
+                  className="bg-gray-500 text-white p-2 rounded-full hover:bg-gray-400"
                 >
                   <FaUserCircle />
                 </NavLink>
+
+                <div className="bg-gray-500 text-white p-2 hover:bg-gray-400 rounded-full cursor-pointer">
+                  <div className="relative">
+                    <FiBell  onClick={() => setOpenNotifications(!openNotifications)} />
+
+                    {data?.some(n => !n.isRead) && (
+                      <span className="absolute -top-2 -right-2 w-3 h-3 bg-green-600 rounded-full" />
+                    )}
+                  </div>
+
+                  {openNotifications && (
+                    <div className="absolute right-2 top-12 mt-2 w-80 h-screen bg-white text-black shadow-xl rounded-xl z-50 max-h-96 overflow-y-auto border border-gray-300">
+                      <span className="p-2 text-bold uppercase flex items-center justify-between">
+                        <span className="flex items-center gap-1"><HiBell className="text-yellow-400" />Notifications</span>
+                        {isDeleteAllNotificationsPending ? <LuLoader /> : <IoTrashBin onClick={() => deleteAllNotifications()} />}
+                      </span>
+                      <hr />
+                      {(!data || data?.length === 0) && (
+                        <p className="p-4 text-gray-400 text-center text-sm">No notifications</p>
+                      )}
+
+                      {data?.map((n) => (
+                        <div
+                          onClick={() => {
+                          mutate(n._id);
+                          navigate(n.link);
+                        }}
+                          key={n._id}
+                          className={`p-3 border-b cursor-pointer hover:bg-gray-100 ${
+                            !n.isRead ? "bg-gray-50" : ""
+                          }`}
+                        >
+
+                          <div
+                            className="flex-1"
+                            onClick={() => {
+                              mutate(n._id);
+                              navigate(n.link);
+                            }}
+                          >
+                            <span className="flex items-center gap-2">
+                              {n.isRead ? <LiaCheckDoubleSolid className="text-blue-500" /> : <LiaCheckDoubleSolid className="text-gray-600" />}
+                              <p className="font-semibold text-sm">{n.title}</p>
+                            </span>
+
+                            <span className="flex items-center justify-between gap-2">
+                              <p className="text-xs text-gray-500 ml-6">
+                                  {n.message}
+                                </p>
+                                <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteId(n._id);
+                                  setDeleteOpen(true);
+                                }}
+                                className="text-gray-400 hover:text-red-500"
+                              >
+                                <IoClose className="text-black" size={18} />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+
+                    </div>
+                  )}
+                </div>
 
                 <button
                   onClick={() => {
                     setConfirmOpen(true);
                   }}
-                  className="bg-red-600 text-white p-2 rounded-full"
+                  className="bg-red-600 text-white p-2 rounded-full hover:bg-red-400"
                 >
                   <IoMdLogOut />
                 </button>
@@ -134,12 +220,81 @@ export default function Navbar() {
 
           <div className="flex items-center gap-3 md:hidden">
             {token && (
-              <NavLink
+              <>
+                <NavLink
                 to="/profile"
                 className="bg-gray-200 p-2 rounded-full"
               >
                 <FaUserCircle className="text-xl text-gray-700" />
               </NavLink>
+
+              <div className="bg-gray-500 text-white p-2 hover:bg-gray-400 rounded-full cursor-pointer">
+                  <div className="relative">
+                    <FiBell  onClick={() => setOpenNotifications(!openNotifications)} />
+
+                    {data?.some(n => !n.isRead) && (
+                      <span className="absolute -top-2 -right-2 w-3 h-3 bg-green-600 rounded-full" />
+                    )}
+                  </div>
+
+                  {openNotifications && (
+                    <div className="absolute right-2 top-12 mt-2 w-80 bg-white h-screen shadow-xl rounded-xl z-50 max-h-96 overflow-y-auto border border-gray-300">
+                      <span className="p-2 text-bold uppercase text-black flex items-center justify-between">
+                        <span className="flex items-center gap-1"><HiBell className="text-yellow-400" />Notifications</span>
+                        {isDeleteAllNotificationsPending ? <LuLoader /> : <IoTrashBin onClick={() => deleteAllNotifications()} />}
+                      </span>
+                      <hr />
+                      {(!data || data?.length === 0) && (                        
+                        <p className="p-4 text-gray-400 text-center text-sm">No notifications</p>
+                      )}
+
+                      {data?.map((n) => (
+                        <div
+                          onClick={() => {
+                          mutate(n._id);
+                          navigate(n.link);
+                        }}
+                          key={n._id}
+                          className={`p-3 border-b cursor-pointer hover:bg-gray-100 ${
+                            !n.isRead ? "bg-gray-50" : ""
+                          }`}
+                        >
+
+                          <div
+                            className="flex-1"
+                            onClick={() => {
+                              mutate(n._id);
+                              navigate(n.link);
+                            }}
+                          >
+                            <span className="flex items-center gap-2">
+                              {n.isRead ? <LiaCheckDoubleSolid className="text-blue-500" /> : <LiaCheckDoubleSolid className="text-gray-600" />}
+                              <p className="font-semibold text-sm">{n.title}</p>
+                            </span>
+
+                            <span className="flex items-center justify-between gap-2">
+                              <p className="text-xs text-gray-500 ml-6">
+                                  {n.message}
+                                </p>
+                                <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteId(n._id);
+                                  setDeleteOpen(true);
+                                }}
+                                className="text-gray-400 hover:text-red-500"
+                              >
+                                <IoClose size={18} />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             <button
@@ -280,7 +435,7 @@ export default function Navbar() {
             </NavLink>
           ) : (
             <button
-              onClick={handleLogout}
+              onClick={() => setConfirmOpen(true)}
               className="w-full bg-red-500 text-white py-2 rounded-xl"
             >
               Logout
@@ -289,10 +444,26 @@ export default function Navbar() {
         </div>
         <Modal
           open={confirmOpen}
-          onClose={() => setConfirmOpen(false)}
+          onCancel={() => setConfirmOpen(false)}
           onOk={handleLogout}
         >
           <p className="font-semibold">Confirm Logout?</p>
+        </Modal>
+
+        <Modal
+          open={deleteOpen}
+          onCancel={() => setDeleteOpen(false)}
+          onOk={() => {
+            deleteNotification(deleteId);
+            setDeleteOpen(false);
+          }}
+          okText="Delete"
+          okButtonProps={{ danger: true }}
+        >
+          <p className="font-semibold">Delete notification?</p>
+          <p className="text-sm text-gray-500">
+            This action cannot be undone.
+          </p>
         </Modal>
       </div>
     </>

@@ -104,6 +104,8 @@ export const getUserApplications = (id) => {
     queryKey: ["user-applications"],
     queryFn: async () => {
       const res = await API.get(`/user/user-applications/${id}`);
+      console.log("User applications", res.data);
+      
       return res.data;
     },
     staleTime: 5000,

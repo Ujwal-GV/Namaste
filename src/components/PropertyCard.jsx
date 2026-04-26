@@ -4,20 +4,28 @@ import { Link } from "react-router-dom";
 import { IoHome } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
 import { FaRupeeSign, FaEye } from "react-icons/fa";
+import { getTimeAgo } from "../utils/TimeAgo";
 
 export default function PropertyCard({ property }) {
   const { token, user } = useContext(AuthContext);
 
   return (
     <Link to={`/property/${property._id}`}>
-      <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+      <div className="bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-300">
 
-        <div className="w-full h-40 bg-gray-200">
+        <div className="relative w-full h-40 bg-gray-200">
+          <span className={`absolute right-2 top-3 text-xs px-2 py-1 rounded-full ${
+            getTimeAgo(property.createdAt) === "New"
+              ? "bg-green-500 text-white font-semibold"
+              : "bg-gray-200 border border-gray-500 text-gray-700"
+          }`}>
+            {getTimeAgo(property.createdAt)}
+          </span>
           {property?.images?.[0] ? (
             <img
               src={property.images[0]}
               alt={property.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-scale-down"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -42,6 +50,14 @@ export default function PropertyCard({ property }) {
             <FaRupeeSign />
             {property.rent}
           </p>
+
+          {/* <span className={`text-xs px-2 py-1 rounded-full ${
+            getTimeAgo(property.createdAt) === "New"
+              ? "bg-green-500 text-white font-semibold"
+              : "bg-gray-200 text-gray-700"
+          }`}>
+            {getTimeAgo(property.createdAt)}
+          </span> */}
 
           <button
             disabled={!token && user?.role !== "owner"}

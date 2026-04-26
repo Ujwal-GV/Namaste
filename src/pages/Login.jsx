@@ -31,7 +31,7 @@ export default function Login() {
             mutate(values, {
               onSuccess: () => {
                 const decoded = jwtDecode(localStorage.getItem("token"));
-                navigate(decoded?.role === "admin" ? "/admin" : "/");
+                navigate(decoded?.role === "admin" ? "/admin/dashboard" : "/");
               },
             });
           }}

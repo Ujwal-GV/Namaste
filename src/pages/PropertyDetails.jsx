@@ -20,6 +20,7 @@ import SkeletonCard from "../components/SkeletonCard";
 import SkeletonPropertyDetails from "../components/SkeletonPropertyDetails";
 import { IoIosCheckmarkCircle, IoMdCloseCircle  } from "react-icons/io";
 import { Loader2Icon } from "lucide-react";
+import { getFormattedDate } from "../utils/TimeAgo";
 
 
 export default function PropertyDetails() {
@@ -70,9 +71,10 @@ export default function PropertyDetails() {
         <div className="space-y-6">
 
           <div className="bg-white shadow rounded-2xl p-5 space-y-3">
-{console.log("Data", data.createdBy._id, "PripertyId", id, "usEr", user.id)
-                    }
-            <h1 className="text-2xl font-bold">{data.title}</h1>
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold">{data.title}</h1>
+              <span className="text-[10px] border border-gray-500 px-2 py-1 rounded-xl">{getFormattedDate(data.createdAt)}</span>
+            </div>
 
             <p className="flex items-center gap-2 text-gray-600">
               <FaLocationDot className="text-red-500" />

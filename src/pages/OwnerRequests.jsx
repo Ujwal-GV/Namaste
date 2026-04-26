@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import SkeletonCard from "../components/SkeletonCard";
 import { useOwnerRequests, useUpdateRequest } from "../hooks/useRequests";
 import { FaCircleExclamation } from "react-icons/fa6";
+import API from "../api/axios";
 
 export default function OwnerRequests() {
   const { data, isLoading } = useOwnerRequests();

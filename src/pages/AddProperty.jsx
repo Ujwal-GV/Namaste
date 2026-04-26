@@ -120,11 +120,23 @@ export default function AddProperty() {
           <textarea
             className="w-full p-3 border rounded-xl"
             placeholder="Full Address"
-            rows={4}
+            rows={3}
             onChange={(e) =>
               setForm({
                 ...form,
                 detailedAddress: e.target.value,
+              })
+            }
+          />
+
+          <textarea
+            className="w-full p-3 border rounded-xl"
+            placeholder="Property Description"
+            rows={3}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                description: e.target.value,
               })
             }
           />
