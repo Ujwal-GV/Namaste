@@ -60,61 +60,77 @@ export default function PropertyDetails() {
   if (isLoading) return <SkeletonPropertyDetails />;
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+    <div className="bg-[#f7f7f7] min-h-screen pb-10">
 
-      <div className="bg-white rounded-2xl shadow p-4">
-        <ImageCarousel images={data?.images || []} />
-      </div>
+      <div className="max-w-7xl mx-auto px-4 pt-6 space-y-6">
 
-      <div className="grid md:grid-cols-2 gap-6">
+        {/* 🖼 IMAGE CAROUSEL */}
+        <div className="rounded-3xl overflow-hidden">
+          <ImageCarousel images={data?.images || []} />
+        </div>
 
-        <div className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-8">
 
-          <div className="bg-white shadow rounded-2xl p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">{data.title}</h1>
-              <span className="text-[10px] border border-gray-500 px-2 py-1 rounded-xl">{getFormattedDate(data.createdAt)}</span>
+          {/* LEFT */}
+          <div className="space-y-6">
+
+            {/* MAIN INFO */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+
+              <div className="flex justify-between items-start">
+                <h1 className="text-2xl md:text-3xl font-semibold text-[#222]">
+                  {data.title}
+                </h1>
+
+                <span className="text-xs text-gray-400">
+                  {getFormattedDate(data.createdAt)}
+                </span>
+              </div>
+
+              <p className="flex items-center gap-2 text-gray-600 text-sm">
+                <FaLocationDot className="text-[#FF5A5F]" />
+                {data.location}
+              </p>
+
+              <p className="text-sm text-gray-500">
+                {data.detailedAddress}
+              </p>
+
+              {/* PRICE */}
+              <div className="flex items-center gap-6 mt-3">
+                <span className="text-2xl font-semibold text-[#222]">
+                  ₹{data.rent}
+                  <span className="text-sm text-gray-500 font-normal">
+                    {" "} / month
+                  </span>
+                </span>
+
+                <span className="text-sm text-gray-500">
+                  Deposit ₹{data.deposit}
+                </span>
+              </div>
+
+              {/* RATING */}
+              <div className="flex items-center gap-1 text-yellow-400 text-sm">
+                <FaStar /><FaStar /><FaStar /><FaStar /><FaStarHalf />
+                <span className="text-gray-500 ml-2">(4.5)</span>
+              </div>
+
+              {/* DESCRIPTION */}
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {data.description}
+              </p>
             </div>
 
-            <p className="flex items-center gap-2 text-gray-600">
-              <FaLocationDot className="text-red-500" />
-              {data.location}
-            </p>
-
-            <p className="text-sm text-gray-500">
-              {data.detailedAddress}
-            </p>
-
-            <div className="flex items-center gap-6 mt-3">
-              <span className="flex items-center gap-1 text-green-600 font-bold text-xl">
-                <RiMoneyRupeeCircleFill />
-                {data.rent}
-              </span>
-
-              <span className="text-gray-500">
-                Deposit: ₹{data.deposit}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1 text-yellow-400">
-              <FaStar /><FaStar /><FaStar /><FaStar /><FaStarHalf />
-              <span className="text-gray-500 ml-2">(4.5)</span>
-            </div>
-
-            <p className="text-sm text-gray-700 mt-3">
-              {data.description}
-            </p>
-          </div>
-
-          {
-            user?.role !== "admin" && (
-              <div className="bg-white shadow rounded-2xl p-5">
+            {/* ACTIONS */}
+            {user?.role !== "admin" && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
 
                 {user?.role !== "owner" ? (
                   <>
                     {!token ? (
-                      <button className="w-full py-3 rounded-xl bg-gray-300 text-gray-500">
-                        Login to Apply
+                      <button className="w-full py-3 rounded-xl bg-gray-200 text-gray-500">
+                        Login to apply
                       </button>
                     ) : !myRequest ? (
                       <button
@@ -124,120 +140,153 @@ export default function PropertyDetails() {
                             message: "Interested in this property",
                           })
                         }
-                        className="w-full py-3 rounded-xl bg-black text-white flex justify-center"
+                        className="w-full py-3 rounded-xl bg-[#FF5A5F] text-white font-medium hover:opacity-90 transition flex justify-center"
                       >
-                        {isPending ? <Loader2Icon className="animatespin-slow-reverse" /> : "Apply"}
+                        {isPending ? (
+                          <Loader2Icon className="animate-spin" />
+                        ) : (
+                          "Apply now"
+                        )}
                       </button>
                     ) : myRequest.status === "pending" ? (
-                      <button className="w-full py-3 rounded-xl bg-yellow-400 text-white flex items-center justify-center gap-2 cursor-not-allowed">
+                      <button className="w-full py-3 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center gap-2 cursor-not-allowed">
                         Pending <IoIosHourglass />
                       </button>
                     ) : myRequest?.status === "accepted" ? (
-                        <button
-                          onClick={async () => {
-                            const res = await API.post("/conversations", {
-                              propertyId: id,
-                              userId: user.id,
-                              ownerId: data.createdBy._id,
+                      <button
+                        onClick={async () => {
+                          const res = await API.post("/conversations", {
+                            propertyId: id,
+                            userId: user.id,
+                            ownerId: data.createdBy._id,
                           });
 
-                          console.log(res.data, "ID");
-                          
-                            navigate(`/chat/${res.data._id}`);
-                          }}
-                          className="w-full py-3 mt-3 rounded-xl bg-black text-white"
-                        >
-                          Chat with Owner
-                        </button>
-                      ) : (
-                      <button className="w-full py-3 rounded-xl bg-red-500 text-white flex items-center justify-center gap-2 cursor-not-allowed">
+                          navigate(`/chat/${res.data._id}`);
+                        }}
+                        className="w-full py-3 rounded-xl bg-[#FF5A5F] text-white"
+                      >
+                        Chat with owner
+                      </button>
+                    ) : (
+                      <button className="w-full py-3 rounded-xl bg-red-100 text-red-500 flex items-center justify-center gap-2 cursor-not-allowed">
                         Rejected <IoMdCloseCircle />
                       </button>
                     )}
                   </>
                 ) : (
                   <div className="flex gap-3">
+
                     <Link
                       to={`/property-requests/${id}`}
-                      className="flex-1 bg-blue-500 text-white py-2 rounded-xl flex justify-center"
+                      className="flex-1 border border-gray-200 py-2 rounded-xl flex justify-center hover:bg-gray-50"
                     >
                       <GiNotebook />
                     </Link>
 
                     <button
                       onClick={() => setEditOpen(true)}
-                      className="flex-1 bg-black text-white py-2 rounded-xl flex justify-center"
+                      className="flex-1 border border-gray-200 py-2 rounded-xl flex justify-center hover:bg-gray-50"
                     >
                       <MdModeEditOutline />
                     </button>
 
                     <button
                       onClick={() => setConfirmDeleteModal(true)}
-                      className="flex-1 bg-red-500 text-white py-2 rounded-xl flex justify-center"
+                      className="flex-1 border border-red-200 text-red-500 py-2 rounded-xl flex justify-center hover:bg-red-50"
                     >
                       {deleteMutation.isPending ? (
-                        <AiOutlineLoading3Quarters className="animate-spin mx-auto" />
+                        <AiOutlineLoading3Quarters className="animate-spin" />
                       ) : (
                         <MdDeleteOutline />
                       )}
                     </button>
+
                   </div>
                 )}
               </div>
-            )
-          }
+            )}
 
-          <div className="bg-white shadow rounded-2xl p-5">
-            <h3 className="font-semibold mb-3">Reviews</h3>
+            {/* REVIEWS */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h3 className="font-semibold mb-3 text-[#222]">
+                Reviews
+              </h3>
 
-            <div className="space-y-3">
-              <div className="p-3 border rounded-xl text-sm">
-                "Great place, good water supply"
-              </div>
-              <div className="p-3 border rounded-xl text-sm">
-                "Owner is responsive"
+              <div className="space-y-3 text-sm text-gray-600">
+                <div className="p-3 bg-gray-50 rounded-xl">
+                  “Great place, good water supply”
+                </div>
+                <div className="p-3 bg-gray-50 rounded-xl">
+                  “Owner is responsive”
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="h-[400px] md:h-full rounded-2xl overflow-hidden shadow">
-          <Map properties={[data]} />
+          {confirmDeleteModal && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+
+              <div className="bg-white w-[90%] max-w-sm rounded-2xl p-6 shadow-xl">
+
+                {/* ICON */}
+                <div className="flex justify-center mb-3">
+                  <div className="bg-red-100 p-3 rounded-full">
+                    <FiAlertOctagon className="text-red-500 text-xl" />
+                  </div>
+                </div>
+
+                {/* TEXT */}
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-[#222]">
+                    Delete property
+                  </h3>
+
+                  <p className="text-sm text-gray-500 mt-2">
+                    This action cannot be undone. This will permanently delete your property listing.
+                  </p>
+                </div>
+
+                {/* ACTIONS */}
+                <div className="mt-6 flex gap-3">
+
+                  <button
+                    onClick={() => setConfirmDeleteModal(false)}
+                    className="flex-1 py-2 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-50 transition"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={() => deleteMutation.mutate()}
+                    className="flex-1 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition flex justify-center"
+                  >
+                    {deleteMutation.isPending ? (
+                      <span className="flex items-center gap-2">
+                        <AiOutlineLoading3Quarters className="animate-spin" />
+                        Deleting
+                      </span>
+                    ) : (
+                      "Delete"
+                    )}
+                  </button>
+
+                </div>
+              </div>
+            </div>
+          )}
+
+          <EditPropertyModal
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            property={data}
+          />
+
+          {/* RIGHT MAP */}
+          <div className="h-[350px] md:h-full rounded-2xl overflow-hidden border border-gray-200">
+            <Map properties={[data]} />
+          </div>
         </div>
       </div>
-
-      {confirmDeleteModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-[90%] max-w-sm text-center">
-            <FiAlertOctagon className="text-red-500 text-3xl mx-auto mb-3" />
-            <p className="mb-4">
-              Delete this property permanently?
-            </p>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => deleteMutation.mutate()}
-                className="flex-1 bg-black text-white py-2 rounded"
-              >
-                Confirm
-              </button>
-
-              <button
-                onClick={() => setConfirmDeleteModal(false)}
-                className="flex-1 bg-red-500 text-white py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <EditPropertyModal
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        property={data}
-      />
     </div>
   );
 }

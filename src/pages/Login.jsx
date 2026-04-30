@@ -10,19 +10,23 @@ import { loginSchema } from "../formikYupSchema/formikYup";
 
 export default function Login() {
   const [hide, setHide] = useState(true);
-
   const { mutate, isPending } = useLogin();
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-3 sm:px-4 py-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f7f7f7] to-white px-4 py-8">
 
-      <div className="bg-white shadow-lg rounded-2xl w-full max-w-md p-5 sm:p-6 md:p-8">
+      <div className="bg-white border border-gray-200 shadow-sm rounded-3xl w-full max-w-md p-6 sm:p-8">
 
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 flex items-center justify-center gap-1">
-          <SiWelcometothejungle className="text-3xl sm:text-5xl mb-1" />
-          elcome Back
-        </h2>
+        {/* HEADER */}
+        <div className="text-center mb-6">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-[#222]">
+            Welcome back
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Log in to continue
+          </p>
+        </div>
 
         <Formik
           initialValues={{ email: "", password: "" }}
@@ -39,8 +43,9 @@ export default function Login() {
           {() => (
             <Form className="space-y-5">
 
+              {/* EMAIL */}
               <div>
-                <label className="text-xs sm:text-sm text-gray-600">
+                <label className="text-xs text-gray-500 mb-1 block">
                   Email
                 </label>
 
@@ -48,7 +53,7 @@ export default function Login() {
                   name="email"
                   type="email"
                   placeholder="Enter your email"
-                  className="w-full p-3.5 sm:p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 outline-none focus:bg-white focus:ring-2 focus:ring-[#FF5A5F]/30 transition text-sm"
                 />
 
                 <ErrorMessage
@@ -58,8 +63,9 @@ export default function Login() {
                 />
               </div>
 
+              {/* PASSWORD */}
               <div className="relative">
-                <label className="text-xs sm:text-sm text-gray-600">
+                <label className="text-xs text-gray-500 mb-1 block">
                   Password
                 </label>
 
@@ -67,11 +73,11 @@ export default function Login() {
                   name="password"
                   type={hide ? "password" : "text"}
                   placeholder="Enter your password"
-                  className="w-full p-3.5 sm:p-3 border rounded-xl pr-12 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 outline-none focus:bg-white focus:ring-2 focus:ring-[#FF5A5F]/30 pr-12 transition text-sm"
                 />
 
                 <span
-                  className="absolute right-4 top-[38px] sm:top-[40px] cursor-pointer text-gray-500"
+                  className="absolute right-4 top-[38px] cursor-pointer text-gray-400 hover:text-gray-600"
                   onClick={() => setHide(!hide)}
                 >
                   {hide ? <FaEye /> : <FaEyeSlash />}
@@ -84,10 +90,11 @@ export default function Login() {
                 />
               </div>
 
+              {/* BUTTON */}
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full bg-black text-white py-3.5 sm:py-3 rounded-xl flex justify-center items-center gap-2 hover:opacity-90 disabled:opacity-60 text-sm sm:text-base"
+                className="w-full bg-[#FF5A5F] text-white py-3 rounded-xl flex justify-center items-center gap-2 hover:opacity-90 disabled:opacity-60 transition text-sm font-medium"
               >
                 {isPending ? (
                   <>
@@ -103,9 +110,13 @@ export default function Login() {
           )}
         </Formik>
 
-        <p className="text-center mt-6 text-xs sm:text-sm text-gray-600">
+        {/* FOOTER */}
+        <p className="text-center mt-6 text-sm text-gray-500">
           Don’t have an account?{" "}
-          <Link to="/register" className="text-black font-semibold">
+          <Link
+            to="/register"
+            className="text-[#FF5A5F] font-medium hover:underline"
+          >
             Register
           </Link>
         </p>

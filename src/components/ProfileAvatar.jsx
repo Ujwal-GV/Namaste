@@ -25,9 +25,6 @@ export default function ProfileAvatar({ image, onUpload }) {
           return false;
         }}
       >
-        <div className="absolute bottom-0 right-0 bg-black text-white p-1 rounded-full cursor-pointer">
-          <MdModeEditOutline />
-        </div>
       </Upload>
     </div>
   );

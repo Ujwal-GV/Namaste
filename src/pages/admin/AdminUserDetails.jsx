@@ -15,9 +15,9 @@ import { IoIosPeople } from "react-icons/io";
 export default function AdminUserDetails() {
   const { id } = useParams();
   const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
-
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [action, setAction] = useState(null);
 
@@ -29,30 +29,13 @@ export default function AdminUserDetails() {
     },
   });
 
-  const {
-    data: propertyData,
-    isLoading: propertyLoading,
-  } = useMyProperties(id);
-
-  const mutation = useMutation({
-    mutationFn: ({ status }) =>
-      API.put(`/admin/update-user-status/${id}`, { status }),
-    onSuccess: () => {
-      toast.success("Updated successfully");
-      queryClient.invalidateQueries(["user-details", id]);
-      setConfirmOpen(false);
-    },
-  });
+  const { data: propertyData, isLoading: propertyLoading } = useMyProperties(id);
 
   const { data: applications, isLoading: appLoading } = useQuery({
     queryKey: ["property-applications", selectedProperty?._id],
     queryFn: async () => {
       if (!selectedProperty?._id) return [];
-      console.log("Property ID:", selectedProperty);
-      
       const res = await API.get(`/admin/property/${selectedProperty._id}/applications`);
-      console.log("RES", res);
-      
       return res.data.requests;
     },
     enabled: !!selectedProperty?._id,
@@ -66,11 +49,11 @@ export default function AdminUserDetails() {
       status: action === "block" ? "blocked" : "active"
     });
     setOpen(false);
-  }
+  };
 
   if (isLoading) {
     return (
-      <div className="p-6 grid md:grid-cols-2 gap-4">
+      <div className="p-6 grid md:grid-cols-2 gap-4 bg-black min-h-screen">
         {[...Array(6)].map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -80,287 +63,197 @@ export default function AdminUserDetails() {
 
   const statusColor =
     data?.accountStatus === "active"
-      ? "text-green-600"
-      : "text-red-500";
+      ? "text-green-400"
+      : "text-red-400";
 
   const verificationColor =
     data?.verificationStatus === "approved"
-      ? "text-green-600"
+      ? "text-green-400"
       : data?.verificationStatus === "rejected"
-      ? "text-red-500"
-      : "text-yellow-500";
+      ? "text-red-400"
+      : "text-yellow-400";
 
   return (
-    <div className="bg-gray-900 min-h-screen p-4 md:p-6">
+    <div className="bg-black min-h-screen p-4 md:p-6 text-white">
 
       <div className="grid lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
 
-        <div className="lg:col-span-1 space-y-4">
+        {/* LEFT SIDE */}
+        <div className="space-y-4">
 
           {/* USER INFO */}
-        <div className="bg-white p-5 rounded-md shadow grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold">{data?.name}</h2>
-            <p className="text-gray-500 text-sm">{data?.email}</p>
-            <p className="text-sm mt-1">
-              Role: <span className="font-semibold uppercase">{data?.role}</span>
-            </p>
-          </div>
+          <div className="bg-gray-900 border border-green-500/20 p-5 rounded-xl shadow">
+            <h2 className="text-xl font-bold">{data?.name}</h2>
+            <p className="text-gray-400 text-sm">{data?.email}</p>
 
-          <div className="flex flex-col md:gap-2">
-            <span className="text-gray-500">
-              Account: <span className={`uppercase font-bold text-sm ${statusColor}`}>{data?.accountStatus}</span>
-            </span>
-            <span className="text-gray-500">
-              Verification: <span className={`uppercase font-bold text-sm ${verificationColor}`}>{data?.verificationStatus}</span>
-            </span>
-          </div>
-          <button
-              className={`w-[90px] md:mt-2  py-1 px-2 rounded-md bg-green-500 ${data?.accountStatus === "active" ? 'bg-green-500' : 'bg-red-600 text-white' }`}
+            <div className="mt-3 text-sm space-y-1">
+              <p>Role: <span className="uppercase font-semibold">{data?.role}</span></p>
+              <p>Account: <span className={`uppercase font-bold ${statusColor}`}>{data?.accountStatus}</span></p>
+              <p>Verification: <span className={`uppercase font-bold ${verificationColor}`}>{data?.verificationStatus}</span></p>
+            </div>
+
+            <button
+              className={`mt-4 px-3 py-1 rounded-lg text-sm ${
+                data?.accountStatus === "active"
+                  ? "bg-red-600"
+                  : "bg-green-500"
+              }`}
               onClick={() => {
                 setOpen(true);
                 setAction(data.accountStatus === "active" ? "block" : "activate");
-              }
-              }
+              }}
             >
-              {data?.accountStatus === "active" ? <span className="flex items-center justify-between gap-2">Block <MdBlock /></span> : <span className="flex items-center justify-between gap-2">Unblock <CgUnblock /></span>}
+              {data?.accountStatus === "active" ? (
+                <span className="flex items-center gap-2">Block <MdBlock /></span>
+              ) : (
+                <span className="flex items-center gap-2">Unblock <CgUnblock /></span>
+              )}
             </button>
-        </div>
+          </div>
 
-        <div className="bg-white p-5 rounded-md shadow space-y-2">
-          <h3 className="font-semibold text-lg">Basic Info</h3>
-          <p>Mobile: {data?.mobile || "N/A"}</p>
-          <p>Joined: {new Date(data?.createdAt).toLocaleDateString()}</p>
-        </div>
+          {/* BASIC INFO */}
+          <div className="bg-gray-900 border border-green-500/20 p-5 rounded-xl">
+            <h3 className="font-semibold text-lg mb-2">Basic Info</h3>
+            <p>Mobile: {data?.mobile || "N/A"}</p>
+            <p>Joined: {new Date(data?.createdAt).toLocaleDateString()}</p>
+          </div>
 
-      <div className="bg-white p-5 rounded-md shadow space-y-2">
-        <h3 className="font-semibold text-lg">Documents</h3>
-
-        <p>
-          ID Proof:{" "}
-          {data?.documents?.idProof ? (
-            <a
-              href={data?.documents.idProof}
-              target="_blank"
-              className="text-blue-500"
-            >
-              View
-            </a>
-          ) : (
-            "❌ Missing"
-          )}
-        </p>
-
-        {data?.role === "owner" && (
-          <p>
-            Property Proof:{" "}
-            {data?.documents?.propertyProof ? (
-              <a
-                href={data?.documents.propertyProof}
-                target="_blank"
-                className="text-blue-500"
-              >
-                View
-              </a>
-            ) : (
-              "❌ Missing"
-            )}
-          </p>
-        )}
-      </div>
-
-      {data?.role === "user" && (
-        <div className="bg-white p-5 rounded-md shadow">
-          <h3 className="font-semibold text-lg mb-3">
-            Applications
-          </h3>
-
-          {data?.applications?.length > 0 ? (
-            <div className="space-y-3">
-              {data?.applications.map((a) => (
-                <div
-                  key={a._id}
-                  className="border p-3 rounded-xl"
-                >
-                  <p className="font-semibold">{a.propertyTitle}</p>
-                  <p className="text-sm text-gray-500">
-                    Owner: {a.ownerEmail}
-                  </p>
-                  <p className="text-sm">
-                    Status:{" "}
-                    <span className="font-semibold uppercase">
-                      {a.status}
-                    </span>
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500">No applications</p>
-          )}
-        </div>
-      )}
-
-          {/* PROPERTY LIST */}
-          <div className="bg-white p-4 rounded-md shadow">
+          {/* PROPERTIES */}
+          <div className="bg-gray-900 border border-green-500/20 p-4 rounded-xl">
             <h3 className="font-semibold mb-3">Properties</h3>
 
             {propertyLoading ? (
-              [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
+              [...Array(3)].map((_, i) => <SkeletonCard key={i} />)
             ) : propertyData?.length > 0 ? (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                 {propertyData.map((p) => (
                   <div
                     key={p._id}
                     onClick={() => setSelectedProperty(p)}
-                    className={`p-3 rounded-xl border cursor-pointer transition 
-                      ${
-                        selectedProperty?._id === p._id
-                          ? "bg-gray-300 text-white border border-black"
-                          : "hover:bg-gray-100"
-                      }`}
+                    className={`p-3 rounded-lg cursor-pointer transition ${
+                      selectedProperty?._id === p._id
+                        ? "bg-green-500/20 border border-green-400"
+                        : "hover:bg-gray-800"
+                    }`}
                   >
                     <p className="font-semibold">{p.title}</p>
-                    <p className="text-xs opacity-70 flex items-center gap-1"> <MdLocationPin className="text-red-600" />{p.location}</p>
+                    <p className="text-xs text-gray-400 flex items-center gap-1">
+                      <MdLocationPin className="text-red-400" />
+                      {p.location}
+                    </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500">No properties</p>
+              <p className="text-gray-400">No properties</p>
             )}
           </div>
         </div>
 
+        {/* RIGHT SIDE */}
         <div className="lg:col-span-2">
 
           {!selectedProperty ? (
-            <div className="bg-white rounded-md p-6 shadow flex items-center justify-center h-full">
-              <p className="text-gray-400">
-                Select a property to view details
-              </p>
+            <div className="bg-gray-900 border border-green-500/20 rounded-xl p-6 text-center">
+              <p className="text-gray-400">Select a property</p>
             </div>
           ) : (
-            <div className="bg-white h-[116vh] rounded-md p-6 shadow space-y-4">
+            <div className="bg-gray-900 border border-green-500/20 rounded-xl p-6 space-y-4">
 
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold">
-                  {selectedProperty.title}
-                </h2>
-                <Link 
-                  to={`/property/${selectedProperty?._id}`}
-                  className="bg-black text-white px-2 py-1 rounded-md hover:bg-gray-700 flex items-center gap-2 text-sm">
+              {/* HEADER */}
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">{selectedProperty.title}</h2>
+                <Link
+                  to={`/property/${selectedProperty._id}`}
+                  className="bg-green-500 text-black px-3 py-1 rounded-md text-sm flex items-center gap-2"
+                >
                   View <FaEye />
                 </Link>
               </div>
 
-              <p className="text-gray-500 flex items-center gap-1">
-                <MdLocationPin className="text-red-600" />{selectedProperty.location}
+              <p className="text-gray-400 flex items-center gap-1">
+                <MdLocationPin /> {selectedProperty.location}
               </p>
 
-              <p className="text-lg font-semibold">
+              <p className="text-green-400 font-bold text-lg">
                 ₹ {selectedProperty.rent}
               </p>
 
-              <div>
-                <h3 className="font-semibold mb-1">Description</h3>
-                <p className="text-sm text-gray-600">
-                  {selectedProperty.description || "No description"}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-1">Details</h3>
-                <p className="text-sm">Deposit: ₹ {selectedProperty.deposit}</p>
-                <p className="text-sm">Status: {selectedProperty.status}</p>
-              </div>
-              <div className="space-y-3">
-
-                <div className="w-full h-64 bg-gray-200 rounded-xl overflow-hidden flex items-center justify-center">
-                  {selectedProperty.images?.[activeImg] ? (
-                    <img
-                      src={selectedProperty.images?.[activeImg]}
-                      alt="img"
-                      className="w-full h-full object-cover"
+              {/* IMAGE */}
+              <div className="w-full h-64 bg-black rounded-lg overflow-hidden flex items-center justify-center">
+                {selectedProperty.images?.[activeImg] ? (
+                  <img
+                    src={selectedProperty.images[activeImg]}
+                    className="w-full h-full object-cover"
                   />
-                  ) : (
-                    <span>No images</span>
-                  )}
-                </div>
+                ) : (
+                  <span>No Image</span>
+                )}
+              </div>
 
-                <div className="flex gap-2 overflow-x-auto items-center justify-center">
-                  {selectedProperty?.images.length > 0 ? (
-                    selectedProperty.images?.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt="img"
-                        onClick={() => setActiveImg(i)}
-                        className={`w-16 h-16 rounded-lg cursor-pointer object-cover border ${
-                          activeImg === i ? "border-black" : "border-gray-300"
-                        }`}
-                      />
-                  ))
-                  ) : (
-                      <span className="`w-16 h-16 rounded-lg cursor-pointer object-cover text-sm">No preview images</span>      
-                  )}
-                </div>
+              {/* THUMBNAILS */}
+              <div className="flex gap-2 overflow-x-auto">
+                {selectedProperty.images?.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    onClick={() => setActiveImg(i)}
+                    className={`w-16 h-16 rounded cursor-pointer border ${
+                      activeImg === i ? "border-green-400" : "border-gray-600"
+                    }`}
+                  />
+                ))}
+              </div>
 
-                <div className="pt-4 border-t">
-                  <span className="flex justify-between">
-                    <h3 className="font-semibold mb-3">Applications for this property</h3>
-                    <p className="flex items-center gap-1">{applications?.length}<IoIosPeople className="text-2xl text-black" /></p>
+              {/* APPLICATIONS */}
+              <div className="pt-4 border-t border-gray-700">
+                <div className="flex justify-between mb-2">
+                  <h3 className="font-semibold">Applications</h3>
+                  <span className="flex items-center gap-1">
+                    {applications?.length || 0} <IoIosPeople />
                   </span>
-
-                  <div className="h-[26vh] overflow-y-auto">
-                    {appLoading ? (
-                      [...Array(3)].map((_, i) => <SkeletonCard key={i} />)
-                    ) : applications?.length > 0 ? (
-                      <div className=" grid grid-cols-3 space-x-2 ">
-                        {applications.map((app) => (
-                          <div key={app._id} className="border rounded-xl p-3 flex justify-between items-center">
-
-                            <div>
-                              <p className="font-semibold">{app.user?.name}</p>
-                              <p className="text-xs text-gray-500">{app.user?.email}</p>
-                            </div>
-
-                            <div className="text-[10px]">
-                              <span className={`font-semibold uppercase
-                                ${app.status === "accepted" ? "text-green-600" :
-                                  app.status === "rejected" ? "text-red-500" :
-                                  "text-yellow-500"}
-                              `}>
-                                {app.status}
-                              </span>
-                            </div>
-
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500">No applications yet</p>
-                    )}
-                  </div>
                 </div>
 
-              </div>              
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {appLoading ? (
+                    [...Array(3)].map((_, i) => <SkeletonCard key={i} />)
+                  ) : applications?.length > 0 ? (
+                    applications.map((app) => (
+                      <div key={app._id} className="bg-black p-3 rounded-lg border border-gray-700">
+                        <p className="font-semibold">{app.user?.name}</p>
+                        <p className="text-xs text-gray-400">{app.user?.email}</p>
+                        <p className={`text-xs font-bold mt-1 ${
+                          app.status === "accepted"
+                            ? "text-green-400"
+                            : app.status === "rejected"
+                            ? "text-red-400"
+                            : "text-yellow-400"
+                        }`}>
+                          {app.status}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-400">No applications</p>
+                  )}
+                </div>
+              </div>
 
             </div>
           )}
         </div>
       </div>
 
+      {/* MODAL */}
       <Modal
-        open = {open}
+        open={open}
         onCancel={() => setOpen(false)}
         onOk={handleBlock}
-        okText="Confirm"
       >
         <p>
-          Are you sure want to {" "}
-          <strong className="uppercase">{action}</strong> this user?
+          Are you sure want to <strong className="uppercase">{action}</strong> this user?
         </p>
-      </ Modal>
+      </Modal>
     </div>
   );
 }

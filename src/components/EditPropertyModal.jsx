@@ -61,130 +61,151 @@ export default function EditPropertyModal({ open, onClose, property }) {
       open={open}
       onCancel={onClose}
       footer={null}
-      width={isMobile ? "100%" : "800px"}
+      width={isMobile ? "100%" : "720px"}
       style={isMobile ? { top: 0, padding: 0 } : { top: 40 }}
       bodyStyle={{
-        padding: isMobile ? "16px" : "24px",
+        padding: 0,
         height: isMobile ? "100vh" : "auto",
       }}
     >
-      <div className="mb-4 sticky top-0 bg-white z-10 pb-2 border-b">
-        <h2 className="text-xl md:text-2xl font-bold">
-          Edit Property
-        </h2>
-        <p className="text-gray-500 text-xs md:text-sm">
-          Update your property details
-        </p>
-      </div>
+      <div className="flex flex-col h-full bg-white">
 
-      <div className="space-y-6 overflow-y-auto max-h-[75vh] md:max-h-none pr-1">
+        {/* HEADER */}
+        <div className="sticky top-0 bg-white z-10 px-5 py-4 border-b">
+          <h2 className="text-xl font-semibold text-[#222]">
+            Edit property
+          </h2>
+          <p className="text-sm text-gray-500">
+            Update your listing details
+          </p>
+        </div>
 
-        <div>
-          <h3 className="text-base md:text-lg font-semibold mb-3">
-            Basic Info
-          </h3>
+        {/* BODY */}
+        <div className="flex-1 overflow-y-auto px-5 py-6 space-y-8">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs md:text-sm font-medium">
-                Title
-              </label>
-              <Input
-                size="large"
-                value={form.title}
-                onChange={(e) =>
-                  setForm({ ...form, title: e.target.value })
-                }
-              />
-            </div>
+          {/* BASIC */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Basic information
+            </h3>
 
-            <div>
-              <label className="text-xs md:text-sm font-medium">
-                Location
-              </label>
-              <Select
-                size="large"
-                value={form.location || undefined}
-                onChange={(value) =>
-                  setForm({ ...form, location: value })
-                }
-                className="w-full"
-              >
-                {locations?.map((loc) => (
-                  <Select.Option key={loc._id} value={loc.name}>
-                    {loc.name}
-                  </Select.Option>
-                ))}
-              </Select>
+            <div className="space-y-4">
+
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">
+                  Title
+                </label>
+                <Input
+                  size="large"
+                  value={form.title}
+                  className="rounded-xl bg-gray-50 border-none"
+                  onChange={(e) =>
+                    setForm({ ...form, title: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">
+                  Location
+                </label>
+                <Select
+                  size="large"
+                  value={form.location || undefined}
+                  onChange={(value) =>
+                    setForm({ ...form, location: value })
+                  }
+                  className="w-full"
+                  popupClassName="rounded-xl"
+                >
+                  {locations?.map((loc) => (
+                    <Select.Option key={loc._id} value={loc.name}>
+                      {loc.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+
             </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="text-base md:text-lg font-semibold mb-3">
-            Pricing
-          </h3>
+          {/* PRICING */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Pricing
+            </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs md:text-sm font-medium">
-                Rent (₹)
-              </label>
-              <Input
-                size="large"
-                type="number"
-                value={form.rent}
-                onChange={(e) =>
-                  setForm({ ...form, rent: e.target.value })
-                }
-              />
-            </div>
+            <div className="grid grid-cols-2 gap-4">
 
-            <div>
-              <label className="text-xs md:text-sm font-medium">
-                Deposit (₹)
-              </label>
-              <Input
-                size="large"
-                type="number"
-                value={form.deposit}
-                onChange={(e) =>
-                  setForm({ ...form, deposit: e.target.value })
-                }
-              />
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">
+                  Rent (₹)
+                </label>
+                <Input
+                  size="large"
+                  type="number"
+                  value={form.rent}
+                  className="rounded-xl bg-gray-50 border-none"
+                  onChange={(e) =>
+                    setForm({ ...form, rent: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">
+                  Deposit (₹)
+                </label>
+                <Input
+                  size="large"
+                  type="number"
+                  value={form.deposit}
+                  className="rounded-xl bg-gray-50 border-none"
+                  onChange={(e) =>
+                    setForm({ ...form, deposit: e.target.value })
+                  }
+                />
+              </div>
+
             </div>
           </div>
+
+          {/* DESCRIPTION */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Description
+            </h3>
+
+            <Input.TextArea
+              rows={4}
+              value={form.description}
+              className="rounded-xl bg-gray-50 border-none"
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+            />
+          </div>
+
         </div>
 
-        <div>
-          <h3 className="text-base md:text-lg font-semibold mb-3">
-            Description
-          </h3>
+        {/* FOOTER */}
+        <div className="sticky bottom-0 bg-white px-5 py-4 border-t flex gap-3">
 
-          <Input.TextArea
-            rows={isMobile ? 4 : 5}
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-          />
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={() => updateMutation.mutate()}
+            className="flex-1 py-2 rounded-xl bg-[#FF5A5F] text-white font-medium hover:opacity-90 transition"
+          >
+            {updateMutation.isPending ? "Saving..." : "Save changes"}
+          </button>
+
         </div>
-      </div>
-
-      <div className="sticky bottom-0 bg-white pt-3 mt-4 border-t flex gap-2">
-        <button
-          onClick={onClose}
-          className="flex-1 py-2 border rounded-lg"
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={() => updateMutation.mutate()}
-          className="flex-1 py-2 bg-black text-white rounded-lg"
-        >
-          {updateMutation.isPending ? "Saving..." : "Save"}
-        </button>
       </div>
     </Modal>
   );

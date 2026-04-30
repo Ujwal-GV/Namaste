@@ -7,15 +7,17 @@ import ProfileModal from "../components/ProfileModal";
 import ProfileAvatar from "../components/ProfileAvatar";
 import SkeletonCard from "../components/SkeletonCard";
 import { MdEmail } from "react-icons/md";
-import { FaPhoneAlt } from "react-icons/fa";
+import { FaPhoneAlt, FaHome } from "react-icons/fa";
 import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
 import { useMyProperties } from "../hooks/useProperties";
 import { TbError404 } from "react-icons/tb";
 import MyPropertyCard from "../components/MyPropertyCard";
-import { motion } from "framer-motion";
 import { ProfileSkeleton } from "../components/ProfileSkeleton";
 import ProfileBadges from "../components/ProfileBadges";
 import { RxCrossCircled } from "react-icons/rx";
+import { SlLocationPin } from "react-icons/sl";
+import { Link } from "react-router-dom";
+import { DocumentPreview } from "../components/DocumentPreview";
 
 export default function Profile() {
   const { user } = useContext(AuthContext);
@@ -30,22 +32,41 @@ export default function Profile() {
   });
 
   const userId = data?._id;
+  const isOwner = data?.role === "owner";
 
   const {
     data: propertyData,
     isLoading: propertyLoading,
   } = useMyProperties(userId);
 
+  // ✅ Role Config (clean pattern)
+  const roleConfig = {
+    owner: {
+      cta: "Add Property",
+      subtitle: `${propertyData?.length || 0} Properties Listed`,
+      completionHint: "Required to publish listings",
+    },
+    tenant: {
+      cta: "Explore",
+      subtitle:
+        data?.verificationStatus === "verified"
+          ? "Verified User"
+          : "Complete your profile",
+      completionHint: "Helps build trust with owners",
+    },
+  };
+
+  const config = roleConfig[data?.role] || roleConfig.tenant;
+
   const getProfileCompletion = (user) => {
-    let total = user?.role === "owner" ? 5 : 4;
+    let total = isOwner ? 5 : 4;
     let completed = 0;
 
     if (user?.name) completed++;
     if (user?.mobile) completed++;
     if (user?.profilePic) completed++;
     if (user?.documents?.idProof) completed++;
-    if (user?.role === "owner" && user?.documents?.propertyProof)
-      completed++;
+    if (isOwner && user?.documents?.propertyProof) completed++;
 
     return Math.round((completed / total) * 100);
   };
@@ -55,14 +76,16 @@ export default function Profile() {
   const completion = getProfileCompletion(data);
 
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
 
-      <div className="bg-white shadow rounded-2xl p-5 flex items-center gap-5">
-        <ProfileAvatar image={data?.profilePic} />
+      {/* 🔥 HERO SECTION */}
+      <div className="bg-white shadow rounded-2xl p-6 flex flex-col md:flex-row md:items-center gap-6">
+
+        <ProfileAvatar image={data?.profilePic} size={80} />
 
         <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="text-2xl font-bold">
               {data?.name || "User"}
             </h2>
 
@@ -71,101 +94,155 @@ export default function Profile() {
             )}
           </div>
 
-          <p className="text-gray-500 text-sm">
-            ID: {user?.id}
+          <p className="text-gray-600 text-sm mt-1">
+            {config.subtitle}
+          </p>
+
+          <p className="flex items-center gap-2 text-gray-500 text-sm mt-1">
+            <SlLocationPin />
+            {data?.location || "No location added"}
           </p>
 
           <button
             onClick={() => setOpen(true)}
-            className="mt-2 text-sm bg-black text-white px-3 py-1 rounded-lg"
+            className="mt-3 text-sm bg-black text-white px-4 py-1.5 rounded-lg"
           >
             Edit Profile
           </button>
         </div>
-      </div>
 
-      <div className="bg-white shadow rounded-2xl p-5">
-        <h3 className="font-semibold mb-3">
-          Profile Completion
-        </h3>
-
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${completion}%` }}
-          transition={{ duration: 0.8 }}
-          className="h-1 bg-black rounded-full"
-        />
-
-        <p className="text-sm text-gray-500 mt-2">
-          {completion}% completed
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <ProfileBadges icon={<MdEmail />} label="Email" value={data?.email} />
-        <ProfileBadges icon={<FaPhoneAlt />} label="Mobile" value={data?.mobile || "Not Added"} />
-        <ProfileBadges
-          icon={
-            data?.accountStatus === "active" ? (
-              <CiCircleCheck className="text-green-500" />
-            ) : (
-              <CiCircleRemove className="text-red-500" />
-            )
-          }
-          label="Account Status"
-          value={data?.accountStatus}
-        />
-        <ProfileBadges
-          icon={<MdEmail />}
-          label="Verification"
-          value={data?.verificationStatus}
-        />
-      </div>
-
-      <div className="bg-white shadow rounded-2xl p-5">
-        <h3 className="font-semibold mb-3">Documents</h3>
-
-        <div className="space-y-2 text-sm">
-          <p className="flex gap-2">
-            ID Proof:{" "}
-            {data?.documents?.idProof ? <span className="flex gap-1 items-center">Uploaded<CiCircleCheck className="text-green-500" /></span> : <span className="flex gap-1 items-center">Missing<RxCrossCircled className="text-red-500" /></span>}
+        {/* Completion */}
+        <div className="w-full md:w-52">
+          <p className="text-sm font-medium mb-1">
+            Profile Completion
           </p>
 
-          {data?.role === "owner" && (
-            <p className="flex gap-2">
-              Property Proof:{" "}
-              {data?.documents?.propertyProof
-                ? <span className="flex gap-1 items-center">Uploaded<CiCircleCheck className="text-green-500" /></span>
-                : <span className="flex gap-2 items-center"><RxCrossCircled /></span>}
-            </p>
-          )}
+          <Progress percent={completion} showInfo={false} strokeColor="black" />
+
+          <p className="text-xs text-gray-500 mt-1 flex justify-between">
+            <span>{completion}%</span>
+            <span>{config.completionHint}</span>
+          </p>
         </div>
       </div>
 
-      <div className="bg-white shadow rounded-2xl p-5 h-[40vh] overflow-y-auto custom-scroll">
-        <h3 className="font-semibold mb-4 border-b pb-2">
-          My Properties
-        </h3>
+      {/* 🔥 GRID SECTION */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {propertyLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
+        {/* LEFT */}
+        <div className="space-y-6">
+
+          <div className="bg-white shadow rounded-2xl p-5">
+            <h3 className="font-semibold mb-4">Contact Info</h3>
+
+            <div className="space-y-3">
+              <ProfileBadges icon={<MdEmail />} label="Email" value={data?.email} />
+              <ProfileBadges icon={<FaPhoneAlt />} label="Mobile" value={data?.mobile || "Not Added"} />
+            </div>
           </div>
-        ) : propertyData?.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {propertyData.map((p) => (
-              <MyPropertyCard key={p._id} property={p} />
-            ))}
+
+          <div className="bg-white shadow rounded-2xl p-5">
+            <h3 className="font-semibold mb-4">Account</h3>
+
+            <div className="space-y-3">
+              <ProfileBadges
+                icon={
+                  data?.accountStatus === "active"
+                    ? <CiCircleCheck className="text-green-500" />
+                    : <CiCircleRemove className="text-red-500" />
+                }
+                label="Status"
+                value={data?.accountStatus}
+              />
+
+              <ProfileBadges
+                icon={<MdEmail />}
+                label="Verification"
+                value={data?.verificationStatus}
+              />
+
+              {/* 🔥 Owner Only */}
+              {isOwner && (
+                <ProfileBadges
+                  icon={<FaHome />}
+                  label="Properties"
+                  value={propertyData?.length || 0}
+                />
+              )}
+            </div>
           </div>
-        ) : (
-          <p className="flex items-center justify-center gap-2 text-gray-500">
-            No Properties <TbError404 />
-          </p>
-        )}
+
+        </div>
+
+        {/* RIGHT */}
+        <div className="space-y-6">
+
+          <div className="bg-white shadow rounded-2xl p-5">
+            <h3 className="font-semibold mb-4">
+              {isOwner ? "Verification Documents" : "Identity Verification"}
+            </h3>
+
+            <div className="space-y-3">
+              <DocumentPreview
+                label="ID Proof"
+                file={data?.documents?.idProof}
+              />
+
+              {isOwner && (
+                <DocumentPreview
+                  label="Property Proof"
+                  file={data?.documents?.propertyProof}
+                />
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
 
+      {/* 🔥 MAIN SECTION (ROLE BASED) */}
+      {isOwner ? (
+        <div className="bg-white shadow rounded-2xl p-5">
+          <div className="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 className="font-semibold">My Properties</h3>
+
+            <Link to={"/add-property"} className="text-sm bg-black text-white px-3 py-1 rounded-lg">
+              {config.cta}
+            </Link>
+          </div>
+
+          {propertyLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : propertyData?.length > 0 ? (
+            <div className="grid grid-cols-1 py-1 px-2 sm:grid-cols-2 md:grid-cols-3 gap-4 h-[40vh] overflow-y-auto">
+              {propertyData.map((p) => (
+                <MyPropertyCard key={p._id} property={p} />
+              ))}
+            </div>
+          ) : (
+            <p className="flex justify-center items-center text-gray-500 gap-2">
+              No Properties <TbError404 />
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white shadow rounded-2xl p-5 text-center">
+          <h3 className="font-semibold mb-2">Get Started</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            Complete your profile to start connecting with owners
+          </p>
+
+          <Link to={"/"} className="bg-black text-white px-4 py-2 rounded-lg">
+            {config.cta}
+          </Link>
+        </div>
+      )}
+
+      {/* REVIEWS */}
       <div className="bg-white shadow rounded-2xl p-5">
         <h3 className="font-semibold mb-3">My Reviews</h3>
         <p className="text-gray-500 text-sm">
@@ -173,6 +250,7 @@ export default function Profile() {
         </p>
       </div>
 
+      {/* MODAL */}
       <ProfileModal
         open={open}
         onClose={() => {

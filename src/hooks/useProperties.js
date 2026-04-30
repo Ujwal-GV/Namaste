@@ -5,6 +5,20 @@ import { data, useNavigate } from "react-router-dom";
 
 const queryClient = useQueryClient;
 
+export const usePreferredProperties = () => {    
+    return useQuery({
+        queryKey: ["preferred-properties"],
+        queryFn: async () => {
+            const res = await API.get(`/property/preferred-properties`);
+            console.log("RES", res);
+            
+            return res.data;
+        },
+        staleTime: 5000,
+        gcTime: 5000,
+    });
+};
+
 export const useGetProperties = (search, page, location, limit) => {
     return useQuery({
         queryKey: ["get-properties", search, page, location, limit],
@@ -24,6 +38,8 @@ export const useMyProperties = (userId) => {
         queryKey: ["my-properties", userId],
         queryFn: async () => {
             const res = await API.get(`/property/my-properties/${userId}`);
+            console.log("My posted properties", res.data);
+            
             return res.data;
         },
         staleTime: 5000,

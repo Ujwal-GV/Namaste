@@ -8,12 +8,11 @@ import { LuLoaderCircle } from "react-icons/lu";
 import { IoDocuments } from "react-icons/io5";
 import useDebounce from "../hooks/useDebounce";
 
-
 export default function AdminOwners() {
   const queryClient = useQueryClient();
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
-
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("pending");
   const [selectedUser, setSelectedUser] = useState(null);
@@ -21,196 +20,166 @@ export default function AdminOwners() {
   const debouncedSearch = useDebounce(search, 500);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["owner-requests", page, activeTab, search, limit],
+    queryKey: ["owner-requests", page, activeTab, debouncedSearch, limit],
     queryFn: async () => {
       const res = await API.get("/admin/owner-requests", {
-        params: {
-          page,
-          limit,
-          status: activeTab,
-          search: debouncedSearch,
-        }
+        params: { page, limit, status: activeTab, search: debouncedSearch },
       });
       return res.data;
     },
-    enabled: true,
   });
 
   const approveMutation = useMutation({
-    mutationKey: ["approve-owner"],
-    mutationFn: async ({ id, status }) => {
-      const res = await API.put(`/admin/approve-owner/${id}`, { status });
-      return res.data;
-    },
-
-    onSuccess: (res) => {
-      toast.success("User request approved");
-    },
-
-    onError: (error) => {
-      toast.error(error?.response?.data?.message || "Update failed");
-    },
-
-    onSettled: () => {
-      queryClient.invalidateQueries(["owner-requests"]);
-    },
+    mutationFn: async ({ id }) =>
+      API.put(`/admin/approve-owner/${id}`, { status: "approved" }),
+    onSuccess: () => toast.success("Approved"),
+    onSettled: () => queryClient.invalidateQueries(["owner-requests"]),
   });
 
   const rejectMutation = useMutation({
-    mutationKey: ["reject-owner"],
-    mutationFn: async ({ id, status }) => {
-      const res = await API.put(`/admin/reject-owner/${id}`, { status });
-      return res.data;
-    },
-
-    onSuccess: () => {
-      toast.success("User request rejected");
-    },
-
-    onError: (error) => {
-      console.log("ERRR", error);
-      
-      toast.error(error?.response?.data?.message || "Update failed");
-    },
-
-    onSettled: () => {
-      queryClient.invalidateQueries(["owner-requests"]);
-    },
+    mutationFn: async ({ id }) =>
+      API.put(`/admin/reject-owner/${id}`, { status: "rejected" }),
+    onSuccess: () => toast.success("Rejected"),
+    onSettled: () => queryClient.invalidateQueries(["owner-requests"]),
   });
-  
-  
 
-  const users = useMemo(() => {
-    return data?.data || [];
-  }, [data]);
-
-console.log("data", data);
-
-  const filtered = users
-    .filter((u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
-    )
-    .filter((u) =>
-      activeTab === "all" ? true : u.verificationStatus === activeTab
-    );
+  const users = useMemo(() => data?.data || [], [data]);
 
   const counts = {
     all: data?.totalUsers || 0,
-    pending: data?.counts.pending || 0,
-    approved: data?.counts.approved || 0,
-    rejected: data?.counts.rejected || 0,
+    pending: data?.counts?.pending || 0,
+    approved: data?.counts?.approved || 0,
+    rejected: data?.counts?.rejected || 0,
   };
 
   const tabs = ["all", "pending", "approved", "rejected"];
 
+  const getTabStyle = (tab) => {
+    if (activeTab !== tab) return "bg-[#111827] text-gray-400";
+
+    switch (tab) {
+      case "pending":
+        return "bg-yellow-500/20 text-yellow-400 border border-yellow-400/30";
+      case "approved":
+        return "bg-green-500/20 text-green-400 border border-green-400/30";
+      case "rejected":
+        return "bg-red-500/20 text-red-400 border border-red-400/30";
+      default:
+        return "bg-cyan-500/20 text-cyan-400 border border-cyan-400/30";
+    }
+  };
+
   return (
-    <div className="space-y-5 custom-background-color min-h-screen p-">
+    <div className="min-h-screen bg-[#0b0f19] text-gray-200 p-4 md:p-6 space-y-6">
 
-      <div className="bg-gray-800 p-4 shadow flex flex-col md:flex-row gap-3 items-center justify-between">
+      {/* 🔥 HEADER */}
+      <div className="bg-[#111827] border border-cyan-500/20 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-md">
 
-        <h2 className="text-2xl font-bold text-white">Owner Approvals</h2>
+        <h2 className="text-xl md:text-2xl font-semibold text-cyan-400 tracking-wide">
+          OWNER APPROVALS
+        </h2>
 
         <input
           type="text"
-          placeholder="Search by email..."
-          className="border p-2 rounded-full bg-gray-100 w-full md:w-1/3 text-black"
+          placeholder="Search users..."
+          className="w-full md:w-1/3 px-4 py-2 rounded-full bg-[#0b0f19] border border-cyan-500/20 focus:outline-none focus:border-cyan-400 text-sm"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <div className="flex overflow-x-auto gap-2 pb-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-full text-sm whitespace-nowrap
-              ${
-                activeTab === tab
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-600"
-              }`}
-          >
-            {tab.toUpperCase()} ({counts[tab]})
-          </button>
-        ))}
-      </div>
-      </div>
-
-      {isLoading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
-          {[...Array(6)].map((_, i) => (
-            <SkeletonCard key={i} />
+        {/* ⚡ TABS */}
+        <div className="flex gap-2 overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-full text-xs md:text-sm whitespace-nowrap transition ${getTabStyle(tab)}`}
+            >
+              {tab.toUpperCase()} ({counts[tab]})
+            </button>
           ))}
         </div>
-      ) : filtered.length > 0 ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
-          {filtered.map((user) => (
-            
+      </div>
+
+      {/* 📦 CONTENT */}
+      {isLoading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+      ) : users.length > 0 ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+          {users.map((user) => (
             <div
               key={user._id}
-              className="dashboard-card p-4 rounded-2xl shadow hover:shadow-lg transition flex flex-col justify-between"
+              className="bg-[#111827] border border-cyan-500/10 rounded-2xl p-4 hover:border-cyan-400 hover:shadow-[0_0_15px_#22d3ee33] transition flex flex-col justify-between"
             >
+
               <div>
-                <p className="font-semibold text-white text-lg truncate">{user.name}</p>
-                <p className="text-sm text-white truncate">{user.email}</p>
+                <p className="font-semibold text-white truncate">
+                  {user.name}
+                </p>
+                <p className="text-xs text-gray-400 truncate">
+                  {user.email}
+                </p>
               </div>
 
-              <div className="my-3 flex justify-between flex-col gap-2 lg:flex-row md:flex-row items-center truncate">
+              {/* STATUS */}
+              <div className="my-3 flex flex-col gap-2">
+
                 <span
-                  className={`text-xs px-3 py-1 rounded-full font-semibold uppercase
-                    ${
-                      user.verificationStatus === "approved"
-                        ? "bg-green-100 text-green-600"
-                        : user.verificationStatus === "rejected"
-                        ? "bg-red-100 text-red-600"
-                        : "bg-yellow-100 text-yellow-600"
-                    }`}
+                  className={`text-xs px-3 py-1 rounded-full font-semibold uppercase w-fit
+                  ${
+                    user.verificationStatus === "approved"
+                      ? "bg-green-500/20 text-green-400"
+                      : user.verificationStatus === "rejected"
+                      ? "bg-red-500/20 text-red-400"
+                      : "bg-yellow-500/20 text-yellow-400"
+                  }`}
                 >
-                  {user.verificationStatus}        
+                  {user.verificationStatus}
                 </span>
+
                 <button
-                    title="Documents"
-                    onClick={() => setSelectedUser(user)}
-                    className="flex items-center gap-2 text-sm px-3 py-1 text-black bg-gray-200 rounded-xl hover:bg-gray-400"
+                  onClick={() => setSelectedUser(user)}
+                  className="flex items-center justify-center gap-2 text-xs px-3 py-2 bg-cyan-500/10 text-cyan-400 rounded-xl hover:bg-cyan-500/20 transition"
+                >
+                  <IoDocuments /> Documents
+                </button>
+
+              </div>
+
+              {/* ACTIONS */}
+              {user.verificationStatus === "pending" && (
+                <div className="flex gap-2">
+
+                  <button
+                    onClick={() => approveMutation.mutate({ id: user._id })}
+                    className="flex-1 bg-green-500/20 text-green-400 py-2 rounded-xl hover:bg-green-500/30 transition flex justify-center"
                   >
-                    <IoDocuments /> <span className="sm:hidden lg:block md:block">View Documents</span>
+                    {approveMutation.isPending
+                      ? <LuLoaderCircle className="animate-spin" />
+                      : "Approve"}
                   </button>
-              </div>
 
-              <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => rejectMutation.mutate({ id: user._id })}
+                    className="flex-1 bg-red-500/20 text-red-400 py-2 rounded-xl hover:bg-red-500/30 transition flex justify-center"
+                  >
+                    {rejectMutation.isPending
+                      ? <LuLoaderCircle className="animate-spin" />
+                      : "Reject"}
+                  </button>
 
-                {user.verificationStatus === "pending" && (
-                  <div className="w-full flex text-center gap-2">
-                    <button
-                      onClick={() =>
-                        approveMutation.mutate({
-                          id: user._id,
-                          status: "approved",
-                        })
-                      }
-                      className="w-1/2 flex justify-center items-center bg-green-500 text-white py-2 rounded-xl"
-                    >
-                      {approveMutation.isPending ? <LuLoaderCircle className="animatespin-slow-reverse" /> : "Approve"}
-                    </button>
+                </div>
+              )}
 
-                    <button
-                      onClick={() =>
-                        rejectMutation.mutate({
-                          id: user._id,
-                          status: "rejected",
-                        })
-                      }
-                      className="w-1/2 flex justify-center items-center bg-red-500 text-white py-2 rounded-xl"
-                    >
-                      {rejectMutation.isPending ? <LuLoaderCircle className="animatespin-slow-reverse" /> : "Reject"}
-                    </button>
-                  </div>
-                )}
-
-              </div>
             </div>
           ))}
+
         </div>
       ) : (
         <div className="h-[300px] flex items-center justify-center text-gray-500">
@@ -218,69 +187,84 @@ console.log("data", data);
         </div>
       )}
 
-      <div className="mt-10 flex flex-col items-center gap-4">
-              <select
-                value={limit}
-                onChange={(e) => {
-                  setLimit(Number(e.target.value));
-                  setPage(1);
-                }}
-                className="border px-3 py-2 rounded-lg text-sm text-black"
-              >
-                <option value={8}>8 / page</option>
-                <option value={16}>16 / page</option>
-                <option value={24}>24 / page</option>
-              </select>
+      {/* 📄 PAGINATION */}
+      <div className="flex flex-col items-center gap-4 mt-8">
 
-              <div className="flex gap-2 flex-wrap justify-center">
-                {[...Array(data?.totalPages || 1)].map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i + 1)}
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      page === i + 1
-                        ? "bg-black text-white"
-                        : "bg-white border hover:bg-gray-100"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <select
+          value={limit}
+          onChange={(e) => {
+            setLimit(Number(e.target.value));
+            setPage(1);
+          }}
+          className="bg-[#111827] border border-cyan-500/20 px-4 py-2 rounded-lg text-sm"
+        >
+          <option value={8}>8 / page</option>
+          <option value={16}>16 / page</option>
+          <option value={24}>24 / page</option>
+        </select>
 
+        <div className="flex gap-2 flex-wrap justify-center">
+          {[...Array(data?.totalPages || 1)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-4 py-2 rounded-full text-sm transition
+                ${
+                  page === i + 1
+                    ? "bg-cyan-500/20 text-cyan-400"
+                    : "bg-[#111827] text-gray-400 hover:bg-[#1f2937]"
+                }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+
+      </div>
+
+      {/* 📑 DOCUMENT MODAL */}
       <Modal
         open={!!selectedUser}
         onCancel={() => setSelectedUser(null)}
         footer={null}
-        title="User Documents"
+        width={500}
+        styles={{
+          content: {
+            background: "#0b0f19",
+            color: "#fff",
+            border: "1px solid rgba(34,211,238,0.2)",
+            borderRadius: "16px"
+          }
+        }}
       >
         {selectedUser && (
-          <div className="space-y-4">
+          <div className="space-y-5">
+
+            <h2 className="text-lg font-semibold text-cyan-400">
+              Documents
+            </h2>
 
             <div>
-              <p className="font-semibold">ID Proof</p>
+              <p className="text-sm text-gray-400">ID Proof</p>
               {selectedUser.documents?.idProof ? (
                 <img
                   src={selectedUser.documents.idProof}
-                  alt="ID"
-                  className="rounded-lg mt-2"
+                  className="rounded-xl mt-2 border border-cyan-500/20"
                 />
               ) : (
-                <p className="text-gray-500">Not uploaded</p>
+                <p className="text-gray-500 text-sm">Not uploaded</p>
               )}
             </div>
 
             <div>
-              <p className="font-semibold">Property Proof</p>
+              <p className="text-sm text-gray-400">Property Proof</p>
               {selectedUser.documents?.propertyProof ? (
                 <img
                   src={selectedUser.documents.propertyProof}
-                  alt="Property"
-                  className="rounded-lg mt-2"
+                  className="rounded-xl mt-2 border border-cyan-500/20"
                 />
               ) : (
-                <p className="text-gray-500">Not uploaded</p>
+                <p className="text-gray-500 text-sm">Not uploaded</p>
               )}
             </div>
 

@@ -1,5 +1,5 @@
 import { useState, useMemo, useContext } from "react";
-import { useGetProperties, useMyProperties } from "../hooks/useProperties";
+import { useGetProperties, useMyProperties, usePreferredProperties } from "../hooks/useProperties";
 import useDebounce from "../hooks/useDebounce";
 import PropertyCard from "../components/PropertyCard";
 import SkeletonCard from "../components/SkeletonCard";
@@ -33,6 +33,11 @@ export default function Home() {
     isLoading: myPropertiesLoading,
   } = useMyProperties(userId);
 
+  const {
+    data: preferredProperties,
+    isLoading: preferredPropertiesLoading,
+  } = usePreferredProperties();
+
   const { data: locations } = useLocations();
 
   const filteredProperties = useMemo(() => {
@@ -58,134 +63,177 @@ export default function Home() {
   }, [myProperties, search, location]);
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20">
+    <div className="bg-[#f7f7f7] min-h-screen pb-24">
 
-      <div className="max-w-5xl mx-auto px-4 mt-4">
-        <div className="bg-white shadow-md rounded-2xl p-3 flex flex-col md:flex-row gap-3">
+      {/* 🔍 SEARCH BAR */}
+      <div className="max-w-6xl mx-auto px-4 pt-6">
+        <div className="bg-white border border-gray-200 shadow-sm rounded-full px-4 py-2 flex flex-row gap-2 items-center">
 
           <input
-            className="w-full md:flex-1 px-4 py-3 border rounded-xl outline-none text-sm md:text-base"
-            placeholder="Search properties..."
+            className="w-full md:flex-1 px-4 py-2 rounded-full outline-none text-sm bg-transparent"
+            placeholder="Search places, locations..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
           <select
-            className="w-full md:w-48 px-4 py-3 border rounded-xl outline-none text-sm md:text-base"
+            className="w-30 px-3 py-2 rounded-full outline-none text-sm bg-transparent"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           >
-            <option value="">All Locations</option>
+            <option value="">Anywhere</option>
             {locations?.map((loc) => (
               <option key={loc._id} value={loc.name}>
                 {loc.name}
               </option>
             ))}
           </select>
-
-          {/* <button className="w-full md:w-auto bg-black text-white px-6 py-3 rounded-xl text-sm md:text-base">
-            Search
-          </button> */}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 mt-6">
+      {/* 🏡 MAIN LAYOUT */}
+      <div className="max-w-7xl mx-auto px-4 mt-8 flex gap-8">
 
-        {isOwner ? (
-          myPropertiesLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          ) : ownerFilteredProperties?.length > 0 ? (
+        {/* 🏘 CONTENT */}
+        <div className="flex-1 space-y-10">
+
+          {isOwner ? (
             <>
-              <h2 className="text-lg font-semibold mb-4">My Properties</h2>
+              {/* OWNER */}
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-[#222]">
+                  My Properties
+                </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {ownerFilteredProperties.map((p) => (
-                  <PropertyCard key={p._id} property={p} />
-                ))}
+                <span className="text-sm text-gray-500">
+                  {ownerFilteredProperties?.length || 0} listings
+                </span>
               </div>
+
+              {myPropertiesLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[...Array(8)].map((_, i) => (
+                    <SkeletonCard key={i} />
+                  ))}
+                </div>
+              ) : ownerFilteredProperties?.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {ownerFilteredProperties.map((p) => (
+                    <PropertyCard key={p._id} property={p} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 text-gray-400">
+                  No properties posted yet
+                </div>
+              )}
             </>
           ) : (
-            <div className="text-center py-20 text-gray-500">
-              No properties posted
-            </div>
-          )
-        ) : (
-          <>
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))}
-              </div>
-            ) : filteredProperties?.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredProperties.map((p) => (
-                  <PropertyCard key={p._id} property={p} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20 text-gray-500">
-                No properties found
-              </div>
-            )}
+            <>
+              {/* TENANT */}
 
-            <div className="mt-10 flex flex-col items-center gap-4">
+              {/* Nearby */}
+              {preferredProperties?.length > 0 && (
+                <div>
+                  <h2 className="text-lg font-semibold text-[#222] mb-3">
+                    Nearby stays
+                  </h2>
 
-              <select
-                value={limit}
-                onChange={(e) => {
-                  setLimit(Number(e.target.value));
-                  setPage(1);
-                }}
-                className="border px-3 py-2 rounded-lg text-sm"
-              >
-                <option value={8}>8 / page</option>
-                <option value={16}>16 / page</option>
-                <option value={24}>24 / page</option>
-              </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {preferredProperties.map((p) => (
+                      <PropertyCard key={p._id} property={p} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              <div className="flex gap-2 flex-wrap justify-center">
-                {[...Array(data?.pages || 1)].map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i + 1)}
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      page === i + 1
-                        ? "bg-black text-white"
-                        : "bg-white border hover:bg-gray-100"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
+              <div className="border-t border-gray-200" />
+
+              {/* Explore */}
+              <div>
+                <h2 className="text-lg font-semibold text-[#222] mb-3">
+                  Explore all stays
+                </h2>
+
+                {isLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {[...Array(8)].map((_, i) => (
+                      <SkeletonCard key={i} />
+                    ))}
+                  </div>
+                ) : filteredProperties?.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredProperties.map((p) => (
+                      <PropertyCard key={p._id} property={p} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-20 text-gray-400">
+                    No properties found
+                  </div>
+                )}
               </div>
-            </div>
-          </>
-        )}
+
+              {/* PAGINATION */}
+              <div className="mt-10 flex flex-col items-center gap-4">
+
+                <select
+                  value={limit}
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="border border-gray-200 px-4 py-2 rounded-lg text-sm bg-white"
+                >
+                  <option value={8}>8 / page</option>
+                  <option value={16}>16 / page</option>
+                  <option value={24}>24 / page</option>
+                </select>
+
+                <div className="flex gap-2 flex-wrap justify-center">
+                  {[...Array(data?.pages || 1)].map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPage(i + 1)}
+                      className={`px-4 py-2 rounded-full text-sm transition ${
+                        page === i + 1
+                          ? "bg-[#FF5A5F] text-white"
+                          : "bg-white border border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+        </div>
       </div>
 
+      {/* 📱 MOBILE FILTER BUTTON */}
       {!isOwner && (
         <button
           onClick={() => setShowFilters(true)}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full shadow-lg md:hidden"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#FF5A5F] text-white px-6 py-3 rounded-full shadow-lg md:hidden"
         >
           Filters
         </button>
       )}
 
+      {/* 📱 FILTER DRAWER */}
       {showFilters && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex">
-          <div className="bg-white w-80 p-4 shadow-lg">
+        <div className="fixed inset-0 bg-black/40 z-50 flex">
+
+          <div className="bg-white w-80 p-4 shadow-xl animate-slideIn">
             <FilterSidebar />
+
             <button
-              className="mt-4 w-full bg-black text-white py-2 rounded"
+              className="mt-4 w-full bg-[#FF5A5F] text-white py-2 rounded-lg"
               onClick={() => setShowFilters(false)}
             >
-              Close
+              Apply Filters
             </button>
           </div>
 

@@ -41,22 +41,25 @@ export default function DetailsList() {
   }, [data, search, roleFilter, statusFilter, sort]);
 
   return (
-    <div className="w-full min-h-screen custom-background-color space-y-4">
+    <div className="w-full min-h-screen bg-black text-white p-4 md:p-6 space-y-6">
 
-      <div className="bg-gray-800 p-4 shadow flex flex-col md:flex-row gap-3 items-center justify-between">
+      {/* HEADER */}
+      <div className="bg-gray-900 border border-green-500/20 rounded-xl p-4 shadow flex flex-col lg:flex-row gap-4 items-center justify-between">
 
+        {/* SEARCH */}
         <input
           type="text"
           placeholder="Search by email..."
-          className="border p-2 rounded-full bg-gray-100 w-full md:w-1/3 text-black"
+          className="w-full lg:w-1/3 px-4 py-2 rounded-full bg-black border border-gray-700 focus:outline-none focus:border-green-400 text-white placeholder-gray-400"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <div className="flex gap-2 flex-wrap">
+        {/* FILTERS */}
+        <div className="flex flex-wrap gap-2 w-full lg:w-auto justify-center lg:justify-end">
 
           <select
-            className="border p-2 rounded-xl bg-gray-100 hover:cursor-pointer text-black"
+            className="px-3 py-2 rounded-lg bg-black border border-gray-700 text-white focus:border-green-400"
             onChange={(e) => setRoleFilter(e.target.value)}
           >
             <option value="">All Roles</option>
@@ -66,7 +69,7 @@ export default function DetailsList() {
           </select>
 
           <select
-            className="border p-2  rounded-xl bg-gray-100 hover:cursor-pointer text-black"
+            className="px-3 py-2 rounded-lg bg-black border border-gray-700 text-white focus:border-green-400"
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">All Status</option>
@@ -75,7 +78,7 @@ export default function DetailsList() {
           </select>
 
           <select
-            className="border p-2  rounded-xl bg-gray-100 hover:cursor-pointer text-black"
+            className="px-3 py-2 rounded-lg bg-black border border-gray-700 text-white focus:border-green-400"
             onChange={(e) => setSort(e.target.value)}
           >
             <option value="">Sort</option>
@@ -85,16 +88,19 @@ export default function DetailsList() {
         </div>
       </div>
 
+      {/* RESULTS */}
       {filteredUsers?.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredUsers.map((user) => (
             <DetailsCard key={user._id} details={user} />
           ))}
         </div>
       ) : (
-        <p className="text-center text-black">
-          No users found
-        </p>
+        <div className="flex items-center justify-center h-[40vh]">
+          <p className="text-gray-400 text-lg">
+            No users found
+          </p>
+        </div>
       )}
     </div>
   );

@@ -35,7 +35,7 @@ const EmailStep = ({ onSendOtp, loading }) => {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-3 rounded-xl flex justify-center"
+            className="w-full bg-[#FF5A5F] text-white py-3 rounded-xl flex justify-center"
           >
             {loading ? (
               <AiOutlineLoading3Quarters className="animate-spin" />
@@ -108,7 +108,7 @@ const OtpStep = ({ email, onVerifyOtp, onRegister, onResend, verifying, register
               <button
                 type="button"
                 onClick={handleVerifyClick}
-                className="w-full mt-3 bg-black text-white py-3 rounded-xl flex justify-center"
+                className="w-full mt-3 bg-[#FF5A5F] text-white py-3 rounded-xl flex justify-center"
               >
                 {verifying ? <AiOutlineLoading3Quarters className="animate-spin" /> : "Verify OTP"}
               </button>
@@ -175,7 +175,7 @@ const OtpStep = ({ email, onVerifyOtp, onRegister, onResend, verifying, register
 
             <ErrorMessage name="accepted" component="p" className="text-red-500 text-xs" />
 
-            <button type="submit" className="w-full bg-black text-white py-3 rounded-xl flex justify-center text-center">
+            <button type="submit" className="w-full bg-[#FF5A5F] text-white py-3 rounded-xl flex justify-center text-center">
               {registering ? <AiOutlineLoading3Quarters className="animate-spin" /> : "Create Account"}
             </button>
           </>
@@ -218,13 +218,36 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-3">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f7f7f7] to-white px-4 py-8">
 
-      <div className="bg-white rounded-2xl shadow w-full max-w-md p-6">
+      <div className="bg-white border border-gray-200 rounded-3xl shadow-sm w-full max-w-md p-6 sm:p-8">
 
-        <h2 className="text-2xl font-bold text-center mb-6">
-          {step === 1 ? "Register Email" : "Create Account"}
-        </h2>
+        {/* HEADER */}
+        <div className="text-center mb-6">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-[#222]">
+            {step === 1 ? "Create your account" : "Verify your email"}
+          </h2>
+
+          <p className="text-sm text-gray-500 mt-1">
+            {step === 1
+              ? "We’ll send you a verification code"
+              : "Enter the OTP to continue"}
+          </p>
+        </div>
+
+        {/* PROGRESS BAR */}
+        <div className="flex items-center gap-2 mb-6">
+          <div
+            className={`h-1 flex-1 rounded-full ${
+              step >= 1 ? "bg-[#FF5A5F]" : "bg-gray-200"
+            }`}
+          />
+          <div
+            className={`h-1 flex-1 rounded-full ${
+              step === 2 ? "bg-[#FF5A5F]" : "bg-gray-200"
+            }`}
+          />
+        </div>
 
         {step === 1 ? (
           <EmailStep onSendOtp={handleSendOtp} loading={sending} />
@@ -238,7 +261,6 @@ export default function Register() {
             registering={registering}
           />
         )}
-
       </div>
     </div>
   );

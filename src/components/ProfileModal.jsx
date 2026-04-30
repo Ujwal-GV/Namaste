@@ -5,6 +5,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { MdDelete } from "react-icons/md";
 import { Loader2Icon } from "lucide-react";
+import { useLocations } from "../hooks/useLocations";
+import { FaPen } from "react-icons/fa";
 
 export default function ProfileModal({ open, onClose, userData }) {
   const [form, setForm] = useState({
@@ -34,6 +36,7 @@ export default function ProfileModal({ open, onClose, userData }) {
       setForm({
         name: userData.name || "",
         mobile: userData.mobile || "",
+        location: userData.location || "",
       });
 
       setExisting({
@@ -43,6 +46,11 @@ export default function ProfileModal({ open, onClose, userData }) {
       });
     }
   }, [userData]);
+
+  const { data: locations, isLoading } = useLocations();
+
+  console.log("locat", locations);
+  
 
   const updateProfileMutation = useMutation({
     mutationFn: async (formData) => {
@@ -80,6 +88,7 @@ export default function ProfileModal({ open, onClose, userData }) {
 
     formData.append("name", form.name);
     formData.append("mobile", form.mobile);
+    formData.append("location", form.location);
 
     if (files.profilePic) formData.append("profilePic", files.profilePic);
     if (files.idProof) formData.append("idProof", files.idProof);
@@ -97,14 +106,14 @@ export default function ProfileModal({ open, onClose, userData }) {
     const currentImage = preview[keyName] || existing[keyName];
 
     return (
-      <div>
+      <div  className="w-full lg:w-1/2 md:w-1/2">
         <p className="text-sm font-medium mb-1">{label}</p>
 
         <Upload
           beforeUpload={(file) => handleFileChange(keyName, file)}
           showUploadList={false}
         >
-          <Button size="small">Upload</Button>
+          <Button>Upload</Button>
         </Upload>
 
         {currentImage && (
@@ -136,28 +145,46 @@ export default function ProfileModal({ open, onClose, userData }) {
       style={{ top: 0 }}
       bodyStyle={{ padding: 0 }}
     >
-      <div className="flex flex-col h-[90vh]">
+      <div className="flex flex-col h-[90vh] bg-gray-50">
+        {console.log("PROFIEL MODAL", userData)
+        }
 
-        <div className="p-4 border-b flex justify-between">
+        {/* Header */}
+        <div className="p-4 border-b bg-white sticky top-0 z-10">
           <h2 className="text-lg font-semibold">Edit Profile</h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-1 space-y-8">
 
-          <div>
-            <h3 className="font-semibold mb-3">Personal Info</h3>
+          {/* Profile Section */}
+          <div className="bg-white p-6 rounded-2xl shadow flex flex-col lg:flex-row md:flex-row items-center gap-6">
+            <div className="w-24 h-24 relative">
+              <img
+                src={preview.profilePic || existing.profilePic}
+                className="w-full h-full object-cover rounded-full border"
+              />
+              <Upload
+                beforeUpload={(file) => handleFileChange("profilePic", file)}
+                showUploadList={false}
+              >
+                <button className="absolute bottom-1 right-2 bg-black text-white p-1 rounded-full text-xs">
+                  <FaPen />
+                </button>
+              </Upload>
+            </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="flex-1">
               <Input
-                placeholder="Name"
+                placeholder="Your name"
                 value={form.name}
                 onChange={(e) =>
                   setForm({ ...form, name: e.target.value })
                 }
+                className="mb-2"
               />
-
               <Input
-                placeholder="Mobile"
+                placeholder="Mobile number"
                 value={form.mobile}
                 onChange={(e) =>
                   setForm({ ...form, mobile: e.target.value })
@@ -166,15 +193,35 @@ export default function ProfileModal({ open, onClose, userData }) {
             </div>
           </div>
 
-          <RenderImageBlock
-            label="Profile Picture"
-            keyName="profilePic"
-          />
+          {/* Personal Info */}
+          <div className="bg-white p-6 rounded-2xl shadow space-y-4">
+            <h3 className="font-semibold text-lg">Location</h3>
 
-          <div>
-            <h3 className="font-semibold mb-3">Documents</h3>
+            <select
+              className="w-full p-3 border rounded-xl"
+              value={form.location}
+              onChange={(e) =>
+                setForm({ ...form, location: e.target.value })
+              }
+            >
+              <option value="">Select Location</option>
+              {isLoading ? (
+                <option>Loading...</option>
+              ) : (
+                locations?.map((loc) => (
+                  <option key={loc._id} value={loc.name}>
+                    {loc.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+          {/* Documents */}
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h3 className="font-semibold text-lg mb-4">Documents</h3>
+
+            <div className="grid md:grid-cols-2 gap-6">
               <RenderImageBlock
                 label="ID Proof"
                 keyName="idProof"
@@ -190,21 +237,23 @@ export default function ProfileModal({ open, onClose, userData }) {
           </div>
         </div>
 
-        <div className="p-4 border-t flex gap-3">
+        {/* Footer */}
+        <div className="p-4 border-t bg-white sticky bottom-0 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 border rounded-lg py-2"
+            className="flex-1 border rounded-xl py-2"
           >
             Cancel
           </button>
 
           <button
             onClick={handleSubmit}
-            className="flex-1 bg-black text-white rounded-lg py-2"
+            className="flex-1 bg-black text-white rounded-xl py-2 flex justify-center items-center"
           >
             {updateProfileMutation.isPending
-              ? <span className="flex justify-center items-center"><Loader2Icon className="animatespin-slow-reverse" />Saving</span>
-              : "Save Changes"}
+              ? <Loader2Icon className="animate-spin mr-2" />
+              : null}
+            Save Changes
           </button>
         </div>
       </div>
