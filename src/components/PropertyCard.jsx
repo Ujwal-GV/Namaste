@@ -9,6 +9,7 @@ import { useFavorites, useToggleFavorite } from "../hooks/useProperties";
 
 export default function PropertyCard({ property }) {
   const { token, user } = useContext(AuthContext);
+  const isOwner = user?.role === 'owner';
 
   const navigate = useNavigate();
 
@@ -25,19 +26,21 @@ export default function PropertyCard({ property }) {
         {/* IMAGE */}
         <div className="relative w-full h-44 bg-gray-100 overflow-hidden">
 
-           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              mutate(property._id);
-            }}
-            className="absolute top-3 right-3 z-10 bg-white p-2 rounded-full shadow"
-          >
-            {isFav ? (
-              <FaHeart className="text-red-500" />
-            ) : (
-              <FaRegHeart />
-            )}
-          </button>
+          {token && !isOwner && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                mutate(property._id);
+              }}
+              className="absolute top-3 right-3 z-10 bg-white p-2 rounded-full shadow"
+            >
+              {isFav ? (
+                <FaHeart className="text-red-500" />
+              ) : (
+                <FaRegHeart />
+              )}
+            </button>
+          )}
 
           {/* BADGE */}
           <span

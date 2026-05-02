@@ -37,6 +37,8 @@ export default function PropertyDetails() {
   const { data: myRequest } = useMyRequest(id, token);
   const navigate = useNavigate();
 
+  const isOwner = user?.role === 'owner';
+
   const deleteMutation = useMutation({
     mutationFn: async () => {
       const res = await API.delete(`/property/${id}`);
@@ -55,6 +57,8 @@ export default function PropertyDetails() {
     queryKey: ["property", id],
     queryFn: async () => {
       const res = await API.get(`/property/${id}`);
+      console.log("Property Details", propertyData);
+      
       
       return res.data;
     },
@@ -110,18 +114,20 @@ export default function PropertyDetails() {
                   {propertyData.location}
                 </p>
 
-                <span 
-                  className="text-sm text-gray-400 p-1 border border-gray-400 rounded-full cursor-pointer"
-                  onClick={() => toggleMutate(propertyData._id)}
-                >  
-                  {favLoading ? (
-                    <LuLoader className="animate-spin text-gray-400 text-sm" />
-                  ) : isFav ? (
-                    <FaHeart className="text-red-500" />
-                  ) : (
-                    <FaRegHeart className="text-gray-600" />
-                  )}
-                </span>
+                {token && !isOwner && (
+                  <span 
+                    className="text-sm text-gray-400 p-1 border border-gray-400 rounded-full cursor-pointer"
+                    onClick={() => toggleMutate(propertyData._id)}
+                  >  
+                    {favLoading ? (
+                      <LuLoader className="animate-spin text-gray-400 text-sm" />
+                    ) : isFav ? (
+                      <FaHeart className="text-red-500" />
+                    ) : (
+                      <FaRegHeart className="text-gray-600" />
+                    )}
+                  </span>
+                )}
               </div>
 
               <p className="text-sm text-gray-500">
