@@ -1,19 +1,19 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import API from "../api/axios";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useApply, useMyRequest } from "../hooks/useRequests";
 import Map from "../components/Map";
 import { FaLocationArrow, FaStar, FaStarHalf } from "react-icons/fa";
-import { FaLocationDot } from "react-icons/fa6"
+import { FaHeart, FaLocationDot, FaRegHeart } from "react-icons/fa6"
 import { RiMoneyRupeeCircleFill } from "react-icons/ri";
 import { MdDeleteOutline, MdModeEditOutline } from "react-icons/md";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import toast from "react-hot-toast";
 import { FiAlertOctagon } from "react-icons/fi";
 import EditPropertyModal from "../components/EditPropertyModal";
-import { IoIosHourglass } from "react-icons/io";
+import { IoIosHeart, IoIosHourglass } from "react-icons/io";
 import { GiNotebook } from "react-icons/gi";
 import ImageCarousel from "../components/ImageCarousel";
 import SkeletonCard from "../components/SkeletonCard";
@@ -21,6 +21,9 @@ import SkeletonPropertyDetails from "../components/SkeletonPropertyDetails";
 import { IoIosCheckmarkCircle, IoMdCloseCircle  } from "react-icons/io";
 import { Loader2Icon } from "lucide-react";
 import { getFormattedDate } from "../utils/TimeAgo";
+import { useBreadcrumb } from "../context/BreadcrumbContext";
+import { useFavorites, useToggleFavorite } from "../hooks/useProperties";
+import { LuLoader } from "react-icons/lu";
 
 
 export default function PropertyDetails() {
@@ -29,8 +32,7 @@ export default function PropertyDetails() {
   const { mutate, isPending } = useApply();
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-
-  console.log("USER IN PROPERTY DETAILS", user);
+  const { setDynamicLabels } = useBreadcrumb();
 
   const { data: myRequest } = useMyRequest(id, token);
   const navigate = useNavigate();
@@ -49,15 +51,30 @@ export default function PropertyDetails() {
     },
   });
 
-  const { data, isLoading } = useQuery({
+  const { data: propertyData, isLoading } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
       const res = await API.get(`/property/${id}`);
+      
       return res.data;
     },
   });
 
-  if (isLoading) return <SkeletonPropertyDetails />;
+    const { data: favorites = [] } = useFavorites();
+    const { mutate: toggleMutate, isPending: favLoading } = useToggleFavorite();
+
+    const isFav = favorites.some((f) => f._id === propertyData?._id);
+
+  useEffect(() => {
+    if(propertyData?._id && propertyData?.title) {
+      setDynamicLabels(prev => ({
+        ...prev,
+        [propertyData?._id]: propertyData?.title,
+      }));
+    }
+  }, [propertyData]);
+
+  if (isLoading) return <SkeletonPropertyDetails />;  
 
   return (
     <div className="bg-[#f7f7f7] min-h-screen pb-10">
@@ -66,7 +83,7 @@ export default function PropertyDetails() {
 
         {/* 🖼 IMAGE CAROUSEL */}
         <div className="rounded-3xl overflow-hidden">
-          <ImageCarousel images={data?.images || []} />
+          <ImageCarousel images={propertyData?.images || []} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -79,34 +96,49 @@ export default function PropertyDetails() {
 
               <div className="flex justify-between items-start">
                 <h1 className="text-2xl md:text-3xl font-semibold text-[#222]">
-                  {data.title}
+                  {propertyData.title}
                 </h1>
 
                 <span className="text-xs text-gray-400">
-                  {getFormattedDate(data.createdAt)}
+                  {getFormattedDate(propertyData.createdAt)}
                 </span>
               </div>
 
-              <p className="flex items-center gap-2 text-gray-600 text-sm">
-                <FaLocationDot className="text-[#FF5A5F]" />
-                {data.location}
-              </p>
+              <div className="flex justify-between items-start">
+                <p className="flex items-center gap-2 text-gray-600 text-sm">
+                  <FaLocationDot className="text-[#FF5A5F]" />
+                  {propertyData.location}
+                </p>
+
+                <span 
+                  className="text-sm text-gray-400 p-1 border border-gray-400 rounded-full cursor-pointer"
+                  onClick={() => toggleMutate(propertyData._id)}
+                >  
+                  {favLoading ? (
+                    <LuLoader className="animate-spin text-gray-400 text-sm" />
+                  ) : isFav ? (
+                    <FaHeart className="text-red-500" />
+                  ) : (
+                    <FaRegHeart className="text-gray-600" />
+                  )}
+                </span>
+              </div>
 
               <p className="text-sm text-gray-500">
-                {data.detailedAddress}
+                {propertyData.detailedAddress}
               </p>
 
               {/* PRICE */}
               <div className="flex items-center gap-6 mt-3">
                 <span className="text-2xl font-semibold text-[#222]">
-                  ₹{data.rent}
+                  ₹{propertyData.rent}
                   <span className="text-sm text-gray-500 font-normal">
                     {" "} / month
                   </span>
                 </span>
 
                 <span className="text-sm text-gray-500">
-                  Deposit ₹{data.deposit}
+                  Deposit ₹{propertyData.deposit}
                 </span>
               </div>
 
@@ -118,7 +150,7 @@ export default function PropertyDetails() {
 
               {/* DESCRIPTION */}
               <p className="text-sm text-gray-700 leading-relaxed">
-                {data.description}
+                {propertyData.description}
               </p>
             </div>
 
@@ -158,10 +190,10 @@ export default function PropertyDetails() {
                           const res = await API.post("/conversations", {
                             propertyId: id,
                             userId: user.id,
-                            ownerId: data.createdBy._id,
+                            ownerId: propertyData.createdBy._id,
                           });
 
-                          navigate(`/chat/${res.data._id}`);
+                          navigate(`/chat/${res.propertyData._id}`);
                         }}
                         className="w-full py-3 rounded-xl bg-[#FF5A5F] text-white"
                       >
@@ -278,12 +310,12 @@ export default function PropertyDetails() {
           <EditPropertyModal
             open={editOpen}
             onClose={() => setEditOpen(false)}
-            property={data}
+            property={propertyData}
           />
 
           {/* RIGHT MAP */}
           <div className="h-[350px] md:h-full rounded-2xl overflow-hidden border border-gray-200">
-            <Map properties={[data]} />
+            <Map properties={[propertyData]} />
           </div>
         </div>
       </div>

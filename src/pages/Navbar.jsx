@@ -60,8 +60,13 @@ export default function Navbar() {
 
           {/* LEFT - LOGO */}
           <div className="flex items-center gap-8">
-            <NavLink to="/" className="text-xl font-semibold text-[#FF5A5F]">
-              Namaste
+            <NavLink to="/" className="flex items-center gap-2 group">
+              <div className="w-9 h-9 rounded-xl bg-[#FF5A5F] flex items-center justify-center text-white font-semibold text-sm shadow-sm group-hover:scale-105 transition">
+                N
+              </div>
+              <span className="text-lg font-semibold text-[#222] group-hover:text-[#FF5A5F] transition">
+                Namaste
+              </span>
             </NavLink>
           </div>
 

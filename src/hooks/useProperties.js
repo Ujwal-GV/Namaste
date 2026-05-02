@@ -10,7 +10,6 @@ export const usePreferredProperties = () => {
         queryKey: ["preferred-properties"],
         queryFn: async () => {
             const res = await API.get(`/property/preferred-properties`);
-            console.log("RES", res);
             
             return res.data;
         },
@@ -38,8 +37,7 @@ export const useMyProperties = (userId) => {
         queryKey: ["my-properties", userId],
         queryFn: async () => {
             const res = await API.get(`/property/my-properties/${userId}`);
-            console.log("My posted properties", res.data);
-            
+
             return res.data;
         },
         staleTime: 5000,
@@ -60,8 +58,6 @@ export const useAddProperty = () => {
                 "Content-Type": "multipart/form-data",
             },
         })
-
-        console.log("Add property result", res.data);
         
         return res.data;
         },
@@ -71,8 +67,56 @@ export const useAddProperty = () => {
             qClient.invalidateQueries(["get-properties"]);
         },
         onError: (error) => {
-            console.log("Add property error", error);
             toast.error(error.response?.data?.message || "Failed to add property");
         }
     });
+};
+
+export const useFavorites = () => {
+  return useQuery({
+    queryKey: ["favorites"],
+    queryFn: async () => {
+      const res = await API.get("/user/favorites");
+      return res.data;
+    },
+  });
+};
+
+export const useToggleFavorite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (propertyId) =>
+      API.post("/user/toggle-favorite", { propertyId }),
+
+    onMutate: async (propertyId) => {
+      await queryClient.cancelQueries(["favorites"]);
+
+      const prev = queryClient.getQueryData(["favorites"]);
+
+      queryClient.setQueryData(["favorites"], (old = []) => {
+        const exists = old.find((p) => p._id === propertyId);
+
+        if (exists) {
+          return old.filter((p) => p._id !== propertyId);
+        } else {
+          return [...old, { _id: propertyId }];
+        }
+      });
+
+      return { prev };
+    },
+
+    onError: (err, _, context) => {
+      queryClient.setQueryData(["favorites"], context.prev);
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries(["favorites"]);
+    },
+
+    onSuccess: () => {
+        toast.success("Favorites updated");
+    }
+  });
 };

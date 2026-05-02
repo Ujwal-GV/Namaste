@@ -1,22 +1,43 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { IoHome } from "react-icons/io5";
-import { FaLocationDot } from "react-icons/fa6";
+import { FaHeart, FaLocationDot, FaRegHeart } from "react-icons/fa6";
 import { FaRupeeSign, FaEye } from "react-icons/fa";
 import { getTimeAgo } from "../utils/TimeAgo";
+import { useFavorites, useToggleFavorite } from "../hooks/useProperties";
 
 export default function PropertyCard({ property }) {
   const { token, user } = useContext(AuthContext);
 
+  const navigate = useNavigate();
+
   const isNew = getTimeAgo(property.createdAt) === "New";
 
+  const { data: favorites = [] } = useFavorites();
+  const { mutate } = useToggleFavorite();
+
+  const isFav = favorites.some((f) => f._id === property._id);
+
   return (
-    <Link to={`/property/${property._id}`}>
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer">
 
         {/* IMAGE */}
         <div className="relative w-full h-44 bg-gray-100 overflow-hidden">
+
+           <button
+            onClick={(e) => {
+              e.stopPropagation();
+              mutate(property._id);
+            }}
+            className="absolute top-3 right-3 z-10 bg-white p-2 rounded-full shadow"
+          >
+            {isFav ? (
+              <FaHeart className="text-red-500" />
+            ) : (
+              <FaRegHeart />
+            )}
+          </button>
 
           {/* BADGE */}
           <span
@@ -65,6 +86,7 @@ export default function PropertyCard({ property }) {
 
           {/* CTA */}
           <button
+            onClick={() => navigate(`/property/${property?._id}`)}
             disabled={!token && user?.role !== "owner"}
             className={`mt-2 w-full py-2 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition ${
               token || user?.role === "owner"
@@ -77,6 +99,5 @@ export default function PropertyCard({ property }) {
 
         </div>
       </div>
-    </Link>
   );
 }

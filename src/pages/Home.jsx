@@ -6,6 +6,7 @@ import SkeletonCard from "../components/SkeletonCard";
 import { useLocations } from "../hooks/useLocations";
 import FilterSidebar from "../components/FilterSidebar";
 import { AuthContext } from "../context/AuthContext";
+import { FaSort } from "react-icons/fa";
 
 export default function Home() {
   const { user } = useContext(AuthContext);
@@ -15,6 +16,9 @@ export default function Home() {
   const [limit, setLimit] = useState(8);
   const [location, setLocation] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sort, setSort] = useState("");
 
   const isOwner = user?.role === "owner";
   const userId = user?.id;
@@ -41,8 +45,32 @@ export default function Home() {
   const { data: locations } = useLocations();
 
   const filteredProperties = useMemo(() => {
-    return data?.properties || [];
-  }, [data]);
+    let props = data?.properties || [];
+
+    if (maxPrice) {
+      props = props.filter((p) => p.rent <= Number(maxPrice));
+    }
+
+    if (minPrice) {
+      props = props.filter((p) => p.rent >= Number(minPrice));
+    }
+
+    if (location) {
+      props = props.filter((p) =>
+        p.location.toLowerCase().includes(location.toLowerCase())
+      );
+    }
+
+    if (sort === "low-high") {
+      props = [...props].sort((a, b) => a.rent - b.rent);
+    }
+
+    if (sort === "high-low") {
+      props = [...props].sort((a, b) => b.rent - a.rent);
+    }
+
+    return props;
+  }, [data, maxPrice, minPrice, sort, location]);
 
   const ownerFilteredProperties = useMemo(() => {
     let props = myProperties || [];
@@ -88,6 +116,16 @@ export default function Home() {
               </option>
             ))}
           </select>
+
+          {!isOwner && (
+            <span
+            title="Sort"
+            className="rounded-full p-2 bg-[#FF5A5F] cursor-pointer"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <FaSort />
+          </span>
+          )}
         </div>
       </div>
 
@@ -224,20 +262,26 @@ export default function Home() {
 
       {/* 📱 FILTER DRAWER */}
       {showFilters && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex">
+        <div className="fixed inset-0 z-50 flex">
 
-          <div className="bg-white w-80 p-4 shadow-xl animate-slideIn">
-            <FilterSidebar />
+          {/* OVERLAY */}
+          <div
+            className="flex-1 bg-black/40"
+            onClick={() => setShowFilters(false)}
+          />
 
-            <button
-              className="mt-4 w-full bg-[#FF5A5F] text-white py-2 rounded-lg"
-              onClick={() => setShowFilters(false)}
-            >
-              Apply Filters
-            </button>
+          {/* DRAWER */}
+          <div className="w-full bg-transparent h-full shadow-xl animate">
+            <FilterSidebar
+              maxPrice={maxPrice}
+              setMaxPrice={setMaxPrice}
+              sort={sort}
+              setSort={setSort}
+              minPrice={minPrice}
+              setMinPrice={setMinPrice}
+              onClose={() => setShowFilters(false)}
+            />
           </div>
-
-          <div className="flex-1" onClick={() => setShowFilters(false)} />
         </div>
       )}
     </div>

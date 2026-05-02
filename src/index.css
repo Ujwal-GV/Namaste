@@ -38,7 +38,17 @@ button {
 
 .animatespin-slow-reverse{
   animation:rotateReverseAnimation 1s ease-in-out infinite ;
-} 
+}
+
+/* smooth slide for mobile drawer */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease;
+}
 
 @keyframes rotateReverseAnimation {
   0%{

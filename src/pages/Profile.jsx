@@ -9,7 +9,7 @@ import SkeletonCard from "../components/SkeletonCard";
 import { MdEmail } from "react-icons/md";
 import { FaPhoneAlt, FaHome } from "react-icons/fa";
 import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
-import { useMyProperties } from "../hooks/useProperties";
+import { useFavorites, useMyProperties } from "../hooks/useProperties";
 import { TbError404 } from "react-icons/tb";
 import MyPropertyCard from "../components/MyPropertyCard";
 import { ProfileSkeleton } from "../components/ProfileSkeleton";
@@ -18,10 +18,16 @@ import { RxCrossCircled } from "react-icons/rx";
 import { SlLocationPin } from "react-icons/sl";
 import { Link } from "react-router-dom";
 import { DocumentPreview } from "../components/DocumentPreview";
+import { IoIosHeart } from "react-icons/io";
+import PropertyCard from "../components/PropertyCard";
+import { CgClose } from "react-icons/cg";
+
 
 export default function Profile() {
   const { user } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
+  const [openFavs, setOpenFavs] = useState(false);
+  const { data: favorites } = useFavorites();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["user-profile"],
@@ -132,8 +138,9 @@ export default function Profile() {
         {/* LEFT */}
         <div className="space-y-6">
 
-          <div className="bg-white shadow rounded-2xl p-5">
-            <h3 className="font-semibold mb-4">Contact Info</h3>
+          {/* CONTACT */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <h3 className="font-semibold mb-4 text-[#222]">Contact Info</h3>
 
             <div className="space-y-3">
               <ProfileBadges icon={<MdEmail />} label="Email" value={data?.email} />
@@ -141,10 +148,12 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="bg-white shadow rounded-2xl p-5">
-            <h3 className="font-semibold mb-4">Account</h3>
+          {/* ACCOUNT */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <h3 className="font-semibold mb-4 text-[#222]">Account</h3>
 
             <div className="space-y-3">
+
               <ProfileBadges
                 icon={
                   data?.accountStatus === "active"
@@ -155,13 +164,25 @@ export default function Profile() {
                 value={data?.accountStatus}
               />
 
-              <ProfileBadges
-                icon={<MdEmail />}
-                label="Verification"
-                value={data?.verificationStatus}
-              />
+              {isOwner ? (
+                <ProfileBadges
+                  icon={<MdEmail />}
+                  label="Verification"
+                  value={data?.verificationStatus}
+                />
+              ) : (
+                <button
+                  onClick={() => setOpenFavs(true)}
+                  className="w-full text-left"
+                >
+                  <ProfileBadges
+                    icon={<IoIosHeart className="text-[#FF5A5F]" />}
+                    label="Favorites"
+                    value={data?.favorites?.length || 0}
+                  />
+                </button>
+              )}
 
-              {/* 🔥 Owner Only */}
               {isOwner && (
                 <ProfileBadges
                   icon={<FaHome />}
@@ -169,8 +190,62 @@ export default function Profile() {
                   value={propertyData?.length || 0}
                 />
               )}
+
             </div>
           </div>
+
+          {/* FAVORITES MODAL */}
+          {!isOwner && openFavs && (
+            <div className="fixed inset-0 z-50">
+
+              {/* overlay */}
+              <div
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={() => setOpenFavs(false)}
+              />
+
+              {/* modal */}
+              <div className="absolute inset-0 flex items-center justify-center p-4">
+
+                <div
+                  className="bg-white w-full max-w-5xl rounded-2xl shadow-xl flex flex-col max-h-[90vh]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+
+                  {/* header */}
+                  <div className="flex justify-between items-center p-5 border-b">
+                    <h2 className="text-lg font-semibold text-[#222]">
+                      Saved Properties
+                    </h2>
+
+                    <CgClose
+                      className="cursor-pointer text-gray-500 hover:text-black"
+                      size={20}
+                      onClick={() => setOpenFavs(false)}
+                    />
+                  </div>
+
+                  {/* content (scrollable) */}
+                  <div className="p-5 overflow-y-auto">
+
+                    {favorites?.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                        {favorites.map((p) => (
+                          <PropertyCard key={p._id} property={p} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-16 text-gray-400">
+                        No saved properties yet
+                      </div>
+                    )}
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
 

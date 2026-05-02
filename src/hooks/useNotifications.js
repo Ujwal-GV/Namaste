@@ -7,7 +7,6 @@ export const getNotifications = () => {
         queryKey: ["notifications"],
         queryFn: async () => {
             const res = await API.get("/notifications");
-            console.log("Data of notifications", res.data)
             return res.data;
         },
     });
