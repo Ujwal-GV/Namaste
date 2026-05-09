@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { Toaster } from 'react-hot-toast';
 import { BreadcrumbProvider } from './context/BreadcrumbContext.jsx'
+import "./i18n";
 
 const queryClient = new QueryClient();
 

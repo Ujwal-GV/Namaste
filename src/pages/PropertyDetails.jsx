@@ -63,6 +63,7 @@ export default function PropertyDetails() {
       return res.data;
     },
   });
+  console.log("Property Details", propertyData);
 
     const { data: favorites = [] } = useFavorites();
     const { mutate: toggleMutate, isPending: favLoading } = useToggleFavorite();
@@ -167,7 +168,10 @@ export default function PropertyDetails() {
                 {user?.role !== "owner" ? (
                   <>
                     {!token ? (
-                      <button className="w-full py-3 rounded-xl bg-gray-200 text-gray-500">
+                      <button
+                        onClick={() => navigate("/login")}
+                        className="w-full py-3 rounded-xl bg-gray-200 text-gray-500 hover:text-black"
+                      >
                         Login to apply
                       </button>
                     ) : !myRequest ? (

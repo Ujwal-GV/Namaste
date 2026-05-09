@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { createContext, useState, useEffect } from "react";
+import i18n from "../i18n";
 
 export const AuthContext = createContext();
 
@@ -21,6 +22,10 @@ export const AuthProvider = ({ children }) => {
 
             setToken(storedToken);
             setUser(decoded);
+
+            if(decoded?.preferredLanguage) {
+                i18n.changeLanguage(decoded.preferredLanguage);
+            }
 
         } catch (error) {
             console.log("Invalid token, clearing...", error.message);

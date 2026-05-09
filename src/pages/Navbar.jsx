@@ -12,6 +12,8 @@ import { HiBell } from "react-icons/hi";
 import { getNotifications, useDeleteAllNotifications, useDeleteSingleNotification, useMarkRead } from "../hooks/useNotifications";
 import { IoClose } from "react-icons/io5";
 import { LuLoader } from "react-icons/lu";
+import LanguageSelector from "../components/LanguageSelector";
+import { useTranslation } from "react-i18next";
 
 function NavItem({ to, label }) {
   return (
@@ -42,6 +44,8 @@ export default function Navbar() {
   const unread = data?.filter(n => !n.isRead).length;
 
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const { t } = useTranslation();
 
   const { mutate } = useMarkRead();
   const { mutate: deleteNotification } = useDeleteSingleNotification();
@@ -76,8 +80,8 @@ export default function Navbar() {
             {/* OWNER LINKS */}
             {user?.role === "owner" && (
               <>
-                <NavItem to={`/my-properties/${user?.id}`} label="My Properties" />
-                <NavItem to="/owner-requests" label="Applications" />
+                <NavItem to={`/my-properties/${user?.id}`} label={t("my_properties")} />
+                <NavItem to="/owner-requests" label={t("applications")} />
               </>
             )}
 
@@ -85,157 +89,111 @@ export default function Navbar() {
             {user?.role !== "owner" && token && (
               <>
                 <NavItem to="/user-applications" label="My Requests" />
-                <NavItem to="/apply-owner" label="Become Owner" />
+                <NavItem to="/apply-owner" label={t("ownership")} />
               </>
             )}
           </div>
 
           {/* RIGHT - ACTIONS */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
 
-            {/* ADD PROPERTY (OWNER ONLY) */}
-            {user?.role === "owner" && (
-              <NavLink
-                to="/add-property"
-                className="hidden md:block px-4 py-2 rounded-full bg-[#FF5A5F] text-white text-sm hover:bg-[#e14c50] transition"
-              >
-                Add Property
-              </NavLink>
-            )}
+            {/* DESKTOP ACTIONS */}
+            <div className="hidden md:flex items-center gap-3">
 
-            {/* NOTIFICATIONS */}
-            {token && (
-              <div className="relative">
-                <button
-                  onClick={() => setOpenNotifications(!openNotifications)}
+              {/* ADD PROPERTY */}
+              {user?.role === "owner" && (
+                <NavLink
+                  to="/add-property"
+                  className="px-4 py-2 rounded-full bg-[#FF5A5F] text-white text-sm hover:bg-[#e14c50] transition"
+                >
+                  {t("add_property")}
+                </NavLink>
+              )}
+
+              {/* NOTIFICATIONS */}
+              {token && (
+                <div className="relative">
+                  <button
+                    onClick={() => setOpenNotifications(!openNotifications)}
+                    className="p-2 rounded-full hover:bg-gray-100"
+                  >
+                    <FiBell className="text-lg text-gray-700" />
+                  </button>
+
+                  {data?.some((n) => !n.isRead) && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF5A5F] rounded-full" />
+                  )}
+                </div>
+              )}
+
+              <LanguageSelector />
+
+              {/* PROFILE */}
+              {token && (
+                <NavLink
+                  to="/profile"
                   className="p-2 rounded-full hover:bg-gray-100"
                 >
-                  <FiBell className="text-lg text-gray-700" />
+                  <FaUserCircle className="text-xl text-gray-700" />
+                </NavLink>
+              )}
+
+              {/* LOGOUT */}
+              {token ? (
+                <button
+                  onClick={() => setConfirmOpen(true)}
+                  className="p-2 rounded-full hover:bg-red-50 text-red-500"
+                >
+                  <IoMdLogOut />
                 </button>
+              ) : (
+                <NavLink
+                  to="/login"
+                  className="px-4 py-2 rounded-full border text-sm hover:bg-gray-100"
+                >
+                  Login
+                </NavLink>
+              )}
+            </div>
 
-                {data?.some(n => !n.isRead) && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF5A5F] rounded-full" />
-                )}
-              </div>
-            )}
+            {/* MOBILE ACTIONS */}
+            <div className="flex md:hidden items-center gap-2">
 
-            {openNotifications && (
-              <div className="absolute right-2 top-12 w-80 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+              {/* MOBILE NOTIFICATION */}
+              {token && (
+                <div className="relative">
+                  <button
+                    onClick={() => setOpenNotifications(!openNotifications)}
+                    className="p-2 rounded-full hover:bg-gray-100"
+                  >
+                    <FiBell className="text-lg text-gray-700" />
+                  </button>
 
-                {/* HEADER */}
-                <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
-                  <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                    <HiBell className="text-rose-500" />
-                    Notifications
-                  </span>
-
-                  {isDeleteAllNotificationsPending ? (
-                    <LuLoader className="animate-spin text-gray-400" />
-                  ) : (
-                    <IoTrashBin
-                      onClick={() => deleteAllNotifications()}
-                      className="text-gray-400 hover:text-red-500 cursor-pointer transition"
-                    />
+                  {data?.some((n) => !n.isRead) && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF5A5F] rounded-full" />
                   )}
                 </div>
+              )}
 
-                {/* CONTENT */}
-                <div className="max-h-96 overflow-y-auto">
+              {/* MOBILE PROFILE */}
+              {token && (
+                <NavLink
+                  to="/profile"
+                  className="p-2 rounded-full hover:bg-gray-100"
+                >
+                  <FaUserCircle className="text-xl text-gray-700" />
+                </NavLink>
+              )}
 
-                  {(!data || data?.length === 0) && (
-                    <p className="p-6 text-gray-400 text-center text-sm">
-                      No notifications yet
-                    </p>
-                  )}
-
-                  {data?.map((n) => (
-                    <div
-                      key={n._id}
-                      onClick={() => {
-                        mutate(n._id);
-                        navigate(n.link);
-                      }}
-                      className={`px-4 py-3 cursor-pointer transition flex gap-3 ${
-                        !n.isRead
-                          ? "bg-rose-50 hover:bg-rose-100"
-                          : "hover:bg-gray-50"
-                      }`}
-                    >
-
-                      {/* ICON */}
-                      <div className="mt-1">
-                        <LiaCheckDoubleSolid
-                          className={`text-lg ${
-                            n.isRead ? "text-gray-400" : "text-rose-500"
-                          }`}
-                        />
-                      </div>
-
-                      {/* TEXT */}
-                      <div className="flex-1">
-
-                        <div className="flex justify-between items-start gap-2">
-
-                          <p className="font-medium text-sm text-gray-800 line-clamp-1">
-                            {n.title}
-                          </p>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteId(n._id);
-                              setDeleteOpen(true);
-                            }}
-                            className="text-gray-300 hover:text-red-500 transition"
-                          >
-                            <IoClose size={16} />
-                          </button>
-
-                        </div>
-
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                          {n.message}
-                        </p>
-
-                      </div>
-                    </div>
-                  ))}
-
-                </div>
-              </div>
-            )}
-
-            {/* PROFILE */}
-            {token && (
-              <NavLink to="/profile" className="p-2 rounded-full hover:bg-gray-100">
-                <FaUserCircle className="text-xl text-gray-700" />
-              </NavLink>
-            )}
-
-            {/* LOGIN / LOGOUT */}
-            {!token ? (
-              <NavLink
-                to="/login"
-                className="px-4 py-2 rounded-full border text-sm hover:bg-gray-100"
-              >
-                Login
-              </NavLink>
-            ) : (
+              {/* HAMBURGER */}
               <button
-                onClick={() => setConfirmOpen(true)}
-                className="p-2 rounded-full hover:bg-red-50 text-red-500"
+                className="p-2 rounded-full hover:bg-gray-100"
+                onClick={() => setMenuOpen(true)}
               >
-                <IoMdLogOut />
+                <FiMenu className="text-xl" />
               </button>
-            )}
+            </div>
 
-            {/* MOBILE MENU */}
-            <button
-              className="md:hidden text-2xl ml-1"
-              onClick={() => setMenuOpen(true)}
-            >
-              <FiMenu />
-            </button>
           </div>
         </div>
       </nav>
@@ -264,17 +222,17 @@ export default function Navbar() {
             onClick={() => setMenuOpen(false)}
             className="px-4 py-3 rounded-xl hover:bg-gray-100"
           >
-            Home
+            {t("home")}
           </NavLink>
 
           {user?.role === "owner" && (
             <>
               <NavLink to={`/my-properties/${user?.id}`} className="px-4 py-3 rounded-xl hover:bg-gray-100">
-                My Properties
+                {t("my_properties")}
               </NavLink>
 
               <NavLink to="/add-property" className="px-4 py-3 rounded-xl hover:bg-gray-100">
-                Add Property
+                {t("add_property")}
               </NavLink>
             </>
           )}
@@ -283,9 +241,14 @@ export default function Navbar() {
             to={user?.role === "owner" ? "/owner-requests" : "/user-applications"}
             className="px-4 py-3 rounded-xl hover:bg-gray-100"
           >
-            Applications
+            {t("applications")}
           </NavLink>
+
+          <div className="px-3 py-3">
+            <LanguageSelector mobile />
+          </div>
         </div>
+
 
         <div className="absolute bottom-0 w-full p-4 border-t">
           {!token ? (
@@ -297,7 +260,7 @@ export default function Navbar() {
               onClick={() => setConfirmOpen(true)}
               className="w-full bg-[#FF5A5F] text-white py-2 rounded-xl"
             >
-              Logout
+              {t("logout")}
             </button>
           )}
         </div>

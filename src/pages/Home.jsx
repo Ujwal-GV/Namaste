@@ -7,6 +7,7 @@ import { useLocations } from "../hooks/useLocations";
 import FilterSidebar from "../components/FilterSidebar";
 import { AuthContext } from "../context/AuthContext";
 import { FaSort } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
   const { user } = useContext(AuthContext);
@@ -19,6 +20,8 @@ export default function Home() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("");
+
+  const { t } = useTranslation();
 
   const isOwner = user?.role === "owner";
   const userId = user?.id;
@@ -99,7 +102,7 @@ export default function Home() {
 
           <input
             className="w-full md:flex-1 px-4 py-2 rounded-full outline-none text-sm bg-transparent"
-            placeholder="Search places, locations..."
+            placeholder={t("search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -140,7 +143,7 @@ export default function Home() {
               {/* OWNER */}
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-[#222]">
-                  My Properties
+                  {t("my_properties")}
                 </h2>
 
                 <span className="text-sm text-gray-500">
@@ -256,7 +259,7 @@ export default function Home() {
           onClick={() => setShowFilters(true)}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#FF5A5F] text-white px-6 py-3 rounded-full shadow-lg md:hidden"
         >
-          Filters
+          {t("filters")}
         </button>
       )}
 

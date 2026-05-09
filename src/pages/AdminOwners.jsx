@@ -81,7 +81,7 @@ export default function AdminOwners() {
 
         <input
           type="text"
-          placeholder="Search users..."
+          placeholder={t("search")}
           className="w-full md:w-1/3 px-4 py-2 rounded-full bg-[#0b0f19] border border-cyan-500/20 focus:outline-none focus:border-cyan-400 text-sm"
           value={search}
           onChange={(e) => setSearch(e.target.value)}

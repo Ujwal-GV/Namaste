@@ -49,7 +49,7 @@ export default function DetailsList() {
         {/* SEARCH */}
         <input
           type="text"
-          placeholder="Search by email..."
+          placeholder={t("search")}
           className="w-full lg:w-1/3 px-4 py-2 rounded-full bg-black border border-gray-700 focus:outline-none focus:border-green-400 text-white placeholder-gray-400"
           value={search}
           onChange={(e) => setSearch(e.target.value)}

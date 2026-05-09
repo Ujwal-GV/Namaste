@@ -90,11 +90,10 @@ export default function PropertyCard({ property }) {
           {/* CTA */}
           <button
             onClick={() => navigate(`/property/${property?._id}`)}
-            disabled={!token && user?.role !== "owner"}
-            className={`mt-2 w-full py-2 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition ${
-              token || user?.role === "owner"
-                ? "bg-[#FF5A5F]/10 text-[#FF5A5F] hover:bg-[#FF5A5F]/20"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            // disabled={!token && user?.role !== "owner"}
+            className={`mt-2 w-full py-2 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition 
+                bg-[#FF5A5F]/10 text-[#FF5A5F] hover:bg-[#FF5A5F]/20
+                // : "bg-gray-100 text-gray-400"
             }`}
           >
             View <FaEye />
