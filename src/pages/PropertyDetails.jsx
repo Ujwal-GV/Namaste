@@ -6,7 +6,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useApply, useMyRequest } from "../hooks/useRequests";
 import Map from "../components/Map";
 import { FaLocationArrow, FaStar, FaStarHalf } from "react-icons/fa";
-import { FaHeart, FaLocationDot, FaRegHeart } from "react-icons/fa6"
+import { FaHeart, FaLocationDot, FaRegHeart, FaUser } from "react-icons/fa6"
 import { RiMoneyRupeeCircleFill } from "react-icons/ri";
 import { MdDeleteOutline, MdModeEditOutline } from "react-icons/md";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
@@ -130,6 +130,11 @@ export default function PropertyDetails() {
                   </span>
                 )}
               </div>
+
+              <p className="flex items-center gap-2 text-gray-600 text-sm">
+                <FaUser className="text-[#FF5A5F]" />
+                {propertyData.createdBy?.name}
+              </p>
 
               <p className="text-sm text-gray-500">
                 {propertyData.detailedAddress}
